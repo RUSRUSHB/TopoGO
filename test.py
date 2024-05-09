@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 
 img = cv2.imread("input/Trefoil.png")
 
@@ -20,6 +21,10 @@ cv2.waitKey(0)
 num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(gray, connectivity=4)
 
 print(f'num_labels: {num_labels}')
+plt.figure()
+plt.imshow(labels)
+plt.show()
+
 print(f'max of labels: {np.max(labels)}')
 
 print(f'stats: {stats}')
