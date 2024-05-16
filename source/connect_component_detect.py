@@ -64,7 +64,16 @@ def connected_components(img):
             continue
         component_sizes[label] = np.sum(labels == label)
 
-    return labels, component_sizes
+    # 重新排序标签
+    new_labels = np.zeros_like(labels)
+    label_mapping = {old_label: new_label for new_label, old_label in enumerate(np.unique(labels))}
+    for old_label, new_label in label_mapping.items():
+        new_labels[labels == old_label] = new_label
+    
+    # 更新component_sizes的标签
+    new_component_sizes = {label_mapping[old_label]: size for old_label, size in component_sizes.items()}
+    # 现在这些标签是从1开始的了
+    return new_labels, new_component_sizes
 
 def visualize_components(img, labels):
     unique_labels = np.unique(labels)
@@ -97,12 +106,12 @@ if __name__ == '__main__':
     cv2.imwrite('output/connected_components.png', output_img)
     # 显示结果
     plt.figure(figsize=(12, 6))
-    # plt.subplot(1, 2, 1)
-    # plt.imshow(binary_img, cmap='gray')
-    # plt.title('Original Image')
-    # plt.axis('off')
+    plt.subplot(1, 2, 1)
+    plt.imshow(binary_img, cmap='gray')
+    plt.title('Original Image')
+    plt.axis('off')
 
-    # plt.subplot(1, 2, 2)
+    plt.subplot(1, 2, 2)
     plt.imshow(output_img)
     plt.title('Connected Components')
     plt.axis('off')
