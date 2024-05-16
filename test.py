@@ -1,35 +1,21 @@
-import cv2
+from source.binarize import binarize
+from source.visualize import visualize, show_each_components
+from source.connect_component_detect import segment_image
+from source.io import load_image, save_image
 import numpy as np
-import matplotlib.pyplot as plt
-
-img = cv2.imread("input/Trefoil.png")
-# img = cv2.imread("input/tibet_knot_colored.png")
-
-# threshold the image
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-_, gray = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
-# invert black and white
-gray = cv2.bitwise_not(gray)
 
 
+# read gif image
+img = load_image("img/rolfsen/3_1.png") # 内径40，外径60
+# visualize(img, 'Original Image')
 
-# show the image
-cv2.imshow("gray", gray)
+bi_img = binarize(img)
+# visualize(bi_img, 'Binarized Image')
 
-cv2.waitKey(0)
+labels, component_sizes, output_img=segment_image(bi_img)
+visualize(output_img, 'Segmented Image', 'colorful')
+# save_image(output_img, 'output/3_1_segment.png')
+show_each_components(labels)
 
-
-# connected component analysis
-num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(gray, connectivity=4)
-
-print(f'num_labels: {num_labels}')
-plt.figure()
-plt.imshow(labels)
-plt.show()
-
-print(f'max of labels: {np.max(labels)}')
-
-print(f'stats: {stats}')
-print(f'centroids: {centroids}')
-
-
+print(f'labels: {labels}')
+print(f'component_sizes: {component_sizes}')
