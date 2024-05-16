@@ -5,7 +5,7 @@ from source.io import load_image, save_image
 
 
 # read gif image
-img = load_image("img/rolfsen/5_1.png") # 内径40，外径60
+img = load_image("img/rolfsen/4_1.png") # 内径40，外径60
 # visualize(img, 'Original Image')
 
 bi_img = binarize(img)
