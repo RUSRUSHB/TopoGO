@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 img = cv2.imread("input/Trefoil.png")
+# img = cv2.imread("input/tibet_knot_colored.png")
 
 # threshold the image
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -14,6 +15,7 @@ gray = cv2.bitwise_not(gray)
 
 # show the image
 cv2.imshow("gray", gray)
+
 cv2.waitKey(0)
 
 
