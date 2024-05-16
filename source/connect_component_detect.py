@@ -97,12 +97,12 @@ if __name__ == '__main__':
     cv2.imwrite('output/connected_components.png', output_img)
     # 显示结果
     plt.figure(figsize=(12, 6))
-    plt.subplot(1, 2, 1)
-    plt.imshow(binary_img, cmap='gray')
-    plt.title('Original Image')
-    plt.axis('off')
+    # plt.subplot(1, 2, 1)
+    # plt.imshow(binary_img, cmap='gray')
+    # plt.title('Original Image')
+    # plt.axis('off')
 
-    plt.subplot(1, 2, 2)
+    # plt.subplot(1, 2, 2)
     plt.imshow(output_img)
     plt.title('Connected Components')
     plt.axis('off')
