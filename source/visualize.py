@@ -1,26 +1,23 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+
 def visualize(img, title, *args):
     # 必选参数：[]
     # 可变参数列表：[彩色]
     plt.figure()
 
-    match len(args):
-        case 0:
-            plt.imshow(img, cmap='gray')
-
-        case 1:
-            match args[0]:
-                case 'colorful':
-                    plt.imshow(img)
-                    plt.title(args[0])
-                case _:
-                    pass
-        case _:
-            pass
+    if len(args) == 0:
+        plt.imshow(img, cmap='gray')
+    elif len(args) == 1:
+        if args[0] == 'colorful':
+            plt.imshow(img)
+            plt.title(args[0])
+    else:
+        pass
     plt.title(title)
     plt.show()
+
 
 def show_each_components(labels):
     # 分别展现每一个组件
@@ -30,3 +27,5 @@ def show_each_components(labels):
         visualize(component, f'Component {i}')
     # 注意到第一个组件是轮廓线，最后一个组件是背景
     pass
+
+
