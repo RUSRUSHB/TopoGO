@@ -9,7 +9,30 @@ c_i=[upline, downlines[0], downlines[1]]
 
 '''
 
+def straighten_fixed(picture: np.array, crossing_data: np.array, windows_loc: np.array, window_size)->np.array:
+    colored_picture = np.zeros_like(picture)
+    colored_picture[picture == max(picture.flatten())] = 255
+    # 背景上色为255
 
+    raw_uplines = crossing_data[:, 0]
+    raw_downlines = crossing_data[:, 1:]
+
+    print("Uplines:\n", raw_uplines)
+    print("Downlines:\n", raw_downlines)
+
+    crossing_num = len(raw_data)
+    windows_list = picture[windows_loc[0]:windows_loc[0]+window_size, windows_loc[1]:windows_loc[1]+window_size]
+
+    startline_list = [raw_downlines[0, 0]]# 从第一个crossing的第一个downline开始
+    target = raw_downlines[0, 0]
+
+    # window中label为target的像素点的坐标，选取第一个点作为seed
+    for i in range(crossing_num):
+        seed = np.where(windows_list == target)[0][0]
+        # 染色算法，向四联通方向扩展
+        colored_picture
+
+    pass
 
 def straighten(raw_data: np.array)->np.array:
     
@@ -33,7 +56,9 @@ def straighten(raw_data: np.array)->np.array:
         for j in range(crossing_num):
             if j != i and target in raw_downlines[j] and j not in crossing_list:
                 crossing_list.append(j)
-                target = [x for x in raw_downlines[j] if x != target][0]
+                # target = [x for x in raw_downlines[j] if x != target][0]
+                target = [x for x in raw_data[j] if x != target][0]
+
                 # [0]是因为它返回的是一个列表，而不是一个数字。而这个列表长度必为1
                 # target 变成了这一crossing的另一个downline
 
@@ -41,7 +66,7 @@ def straighten(raw_data: np.array)->np.array:
                 
                 break
     
-    print("Line list:", line_list)
+    print("Start Line list:", line_list)
     print("Crossing list:", crossing_list)
     
     straight_data = np.zeros([crossing_num, 4], dtype=int)
@@ -66,10 +91,9 @@ def alex_polynomial(straight_data: np.array)->np.array:
     matrix = sp.zeros(n)
     for i in range(n):
         matrix[i, uplines[i]] = 1-t
-        # matrix[i, downlines_out[i]] = t
-        # matrix[i, downlines_in[i]] = -1
-        matrix[i, downlines_out[i]] = -1
-        matrix[i, downlines_in[i]] = t
+        matrix[i, downlines_out[i]] = t
+        matrix[i, downlines_in[i]] = -1
+        # 压线是1-t，被压前是-1，被压后是t
     # 计算行列式
     # print(matrix)
     # 一行行打印矩阵
@@ -87,6 +111,14 @@ def alex_polynomial(straight_data: np.array)->np.array:
 
 # 样例：
 if __name__ == "__main__":
+    # t = sp.symbols('t')
+    # matrix = sp.Matrix([[1-t,0,0,0,-1,t],[-1,t,0,0,1-t,0],[0,1-t,0,-1,t,0],[0,-1,t,1-t,0,0],[-1,0,1-t,0,0,t],[0,0,t,-1,0,1-t]])
+    # matrix.row_del(0)
+    # matrix.col_del(0)
+    # print(matrix)
+    # print(sp.det(matrix))
+
+
     # raw_data = np.array([[1,3,2], [3,1,2], [2,3,1]])-1
     # 3_1 trefoil
 
