@@ -6,3 +6,5 @@ __pycache__/
 
 # 忽略 source 文件夹下的 __pycache__ 文件夹
 source/__pycache__/
+
+spider/
