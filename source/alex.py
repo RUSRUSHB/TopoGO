@@ -23,7 +23,7 @@ def straighten_fixed(picture: np.array, crossing_data: np.array, windows_loc: np
     crossing_num = len(raw_data)
     windows_list = picture[windows_loc[0]:windows_loc[0]+window_size, windows_loc[1]:windows_loc[1]+window_size]
 
-    startline_list = [raw_downlines[0, 0]]# 从第一个crossing的第一个downline开始
+    startstart_line_list = [raw_downlines[0, 0]]# 从第一个crossing的第一个downline开始
     target = raw_downlines[0, 0]
 
     # window中label为target的像素点的坐标，选取第一个点作为seed
@@ -47,7 +47,7 @@ def straighten(raw_data: np.array)->np.array:
 
     # 1. 从第一个crossing开始
     crossing_list = [0]  # 从原始数据的第一个crossing开始
-    line_list = [raw_downlines[0, 0]]# 从第一个crossing的第一个downline开始
+    start_line_list = [raw_downlines[0, 0]]# 从第一个crossing的第一个downline开始
     crossing_num = len(raw_data)
     target = raw_downlines[0, 0]
 
@@ -55,34 +55,34 @@ def straighten(raw_data: np.array)->np.array:
     for i in range(crossing_num):
         for j in range(crossing_num):
             if j != i and target in raw_downlines[j] and j not in crossing_list:
+                # 如果这个crossing的downlines中有target，且这个crossing没有被访问过
+
                 crossing_list.append(j)
-                # target = [x for x in raw_downlines[j] if x != target][0]
-                target = [x for x in raw_data[j] if x != target][0]
-
+                target = [x for x in raw_downlines[j] if x != target][0]
+                # 从这个crossing的downlines中找到不是target（也就是另外一个）的那个downline
                 # [0]是因为它返回的是一个列表，而不是一个数字。而这个列表长度必为1
-                # target 变成了这一crossing的另一个downline
-
-                line_list.append(target)
+                start_line_list.append(target)
                 
                 break
     
-    print("Start Line list:", line_list)
+    print("Start Line list:", start_line_list)
     print("Crossing list:", crossing_list)
     
     straight_data = np.zeros([crossing_num, 4], dtype=int)
-    # 按照crossing_list的顺序，将raw_data的数据按照line_list的顺序填入
+    # 按照crossing_list的顺序，将raw_data的数据按照start_line_list的顺序填入
     for i in range(crossing_num):
         straight_data[i, 0] = crossing_list[i]
         straight_data[i, 1] = raw_uplines[crossing_list[i]]
-        straight_data[i, 2] = line_list[i]
+        straight_data[i, 2] = start_line_list[i]
         straight_data[i, 3] = [x for x in raw_downlines[crossing_list[i]] if x != straight_data[i, 2]][0]
-    print("Straight data:\n", straight_data)
+
+    print("Straight data:\nCrossing|Upline|Downline_out|Downline_in\n", straight_data)
     return straight_data
 
 def alex_polynomial(straight_data: np.array)->np.array:
-    # upline: 1-t; downline_start: t; downline_end: -1
+    # upline: 1-t; downline_out: t; downline_in: -1
+    
     t = sp.symbols('t')
-    # t = 10
     # 生成矩阵
     n = len(straight_data)
     uplines = straight_data[:, 1]
@@ -102,9 +102,9 @@ def alex_polynomial(straight_data: np.array)->np.array:
     # 移除第一行和第一列
     matrix.row_del(0)
     matrix.col_del(0)
-    # print('Matrix after removing the last row and the last column:')
-    # for i in range(n-1):
-    #     print(matrix[i, :])
+    print('Matrix after removing the first row and the first column:')
+    for i in range(n-1):
+        print(matrix[i, :])
     det = sp.det(matrix)
     print("Det:\n", det)
     pass    
@@ -121,12 +121,15 @@ if __name__ == "__main__":
 
     # raw_data = np.array([[1,3,2], [3,1,2], [2,3,1]])-1
     # 3_1 trefoil
+    # ANS: 1-t+t^2
 
-    raw_data = np.array([[1,2,0], [0,2,5],[3,4,1],[2,1,3],[4,5,3],[5,4,0]])
+    # raw_data = np.array([[1,2,0], [0,2,5],[3,4,1],[2,1,3],[4,5,3],[5,4,0]])
     # 6_1
+    # ANS: 2-5*t+2*t^2
 
-    # raw_data = np.array([[3,6,1],[6,3,4],[1,6,5],[5,1,2],[2,5,4],[4,2,3]])-1
+    raw_data = np.array([[3,6,1],[6,3,4],[1,6,5],[5,1,2],[2,5,4],[4,2,3]])-1
     # 知乎中的例子
+    # ANS: -2t^3+5t^2-2t
 
     straightened_data = straighten(raw_data)
     alex_polynomial(straightened_data)
