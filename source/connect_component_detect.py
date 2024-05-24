@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
+
 def connected_components(img):
     height, width = img.shape
     labels = np.zeros((height, width), dtype=int)
@@ -66,14 +67,17 @@ def connected_components(img):
 
     # 重新排序标签
     new_labels = np.zeros_like(labels)
-    label_mapping = {old_label: new_label for new_label, old_label in enumerate(np.unique(labels))}
+    label_mapping = {old_label: new_label for new_label,
+                     old_label in enumerate(np.unique(labels))}
     for old_label, new_label in label_mapping.items():
         new_labels[labels == old_label] = new_label
-    
+
     # 更新component_sizes的标签
-    new_component_sizes = {label_mapping[old_label]: size for old_label, size in component_sizes.items()}
+    new_component_sizes = {
+        label_mapping[old_label]: size for old_label, size in component_sizes.items()}
     # 现在这些标签是从1开始的了
     return new_labels, new_component_sizes
+
 
 def visualize_components(img, labels):
     unique_labels = np.unique(labels)
@@ -89,10 +93,12 @@ def visualize_components(img, labels):
 
     return output_img
 
+
 def segment_image(binary_img):
     labels, component_sizes = connected_components(binary_img)
     output_img = visualize_components(binary_img, labels)
     return labels, component_sizes, output_img
+
 
 # 示例使用
 if __name__ == '__main__':
