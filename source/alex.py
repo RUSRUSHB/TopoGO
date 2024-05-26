@@ -112,7 +112,7 @@ def alex_polynomial(straight_data: np.array)->np.array:
     print(f'Lowest term: {lowest_term}')
     reduce_det = sp.div(det, lowest_term/abs(lowest_term.coeff(t)))[0]
     print("Reduced Det:\n", reduce_det)
-    pass    
+    pass
 
 # 样例：
 if __name__ == "__main__":
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     # raw_data = np.array([[0,2,3],[1,1,0],[2,3,0],[3,2,1]])
     # 3_1 trefoil
     # ANS: 1-t+t^2
-
+    
     # raw_data = np.array([[1,2,0], [0,2,5],[3,4,1],[2,1,3],[4,5,3],[5,4,0]])
     # 6_1
     # ANS: 2-5*t+2*t^2
