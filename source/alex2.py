@@ -1,38 +1,69 @@
 import numpy as np
 import sympy as sp
 '''
-window_scan返回的数组维度为(n, 3):
-c_i=[upline, downlines[0], downlines[1]]
+window_scan返回的数组维度为(n, 4):
+c_i=[crossing, upline, downlines[0], downlines[1]]
 每个crossing有三条线，两条在下面，一条在上面
 相对应地，每一条线都对应着两个crossing，两次都在下面
 任务1：理顺downlines，使得每一个line只会成为一次downlines[0]、一次downlines[1]
 
 '''
 
-def straighten_fixed(picture: np.array, crossing_data: np.array, windows_loc: np.array, window_size)->np.array:
-    colored_picture = np.zeros_like(picture)
-    colored_picture[picture == max(picture.flatten())] = 255
-    # 背景上色为255
+def create_snake_array(n):
+    # 第一部分：从 [0, 0] 到 [n-1, 0]
+    part1 = np.column_stack((np.arange(n), np.zeros(n, dtype=int)))
 
-    raw_uplines = crossing_data[:, 0]
-    raw_downlines = crossing_data[:, 1:]
+    # 第二部分：从 [n-1, 1] 到 [n-1, n-1]
+    part2 = np.column_stack((np.full(n-1, n-1), np.arange(1, n)))
 
-    print("Uplines:\n", raw_uplines)
-    print("Downlines:\n", raw_downlines)
+    # 第三部分：从 [n-1, n-1] 到 [n-1, 0]
+    part3 = np.column_stack((np.full(n-1, n-1), np.arange(n-1, 0, -1)))
 
-    crossing_num = len(raw_data)
-    windows_list = picture[windows_loc[0]:windows_loc[0]+window_size, windows_loc[1]:windows_loc[1]+window_size]
+    # 第四部分：从 [n-1, 0] 到 [1, 0]
+    part4 = np.column_stack((np.arange(n-1, 0, -1), np.zeros(n-1, dtype=int)))
 
-    start_line_list = [raw_downlines[0, 0]]# 从第一个crossing的第一个downline开始
-    target = raw_downlines[0, 0]
+    # 合并所有部分
+    snake_array = np.vstack((part1, part2, part3, part4))
 
-    # window中label为target的像素点的坐标，选取第一个点作为seed
-    for i in range(crossing_num):
-        seed = np.where(windows_list == target)[0][0]
-        # 染色算法，向四联通方向扩展
-        colored_picture
+    return snake_array
+def extract_boundary_counterclockwise(matrix):
+    # 确保输入是一个二维数组
+    if len(matrix.shape) != 2:
+        raise ValueError("Input must be a 2D array")
+    
+    rows, cols = matrix.shape
+    if rows == 1:
+        return matrix[0, :].tolist()
+    if cols == 1:
+        return matrix[:, 0].tolist()
 
-    pass
+    # 提取边界元素
+    boundary_elements = []
+
+    # 上边界（从左到右）
+    boundary_elements.extend(matrix[0, :])
+
+    # 右边界（从上到下，不包括第一个元素）
+    boundary_elements.extend(matrix[1:, -1])
+
+    # 下边界（从右到左，不包括第一个和最后一个元素）
+    if rows > 1:
+        boundary_elements.extend(matrix[-1, -2::-1])
+
+    # 左边界（从下到上，不包括第一个和最后一个元素）
+    if cols > 1:
+        boundary_elements.extend(matrix[-2:0:-1, 0])
+
+    return boundary_elements
+
+
+def window_area_reassign(windows):
+    windows_size = windows.shape[0]
+    snake_array = create_snake_array(windows_size)
+
+
+
+    around_loc = np
 
 def straighten(raw_data: np.array)->np.array:
     
@@ -80,45 +111,20 @@ def straighten(raw_data: np.array)->np.array:
     return straight_data
 
 def alex_polynomial(straight_data: np.array)->np.array:
-    # upline: 1-t; downline_out: t; downline_in: -1
-    
-    t = sp.symbols('t')
-    # 生成矩阵
-    n = len(straight_data)
-    uplines = straight_data[:, 1]
-    downlines_out = straight_data[:, 2]
-    downlines_in = straight_data[:, 3]
-    matrix = sp.zeros(n)
-    for i in range(n):
-        matrix[i, uplines[i]] = 1-t
-        matrix[i, downlines_out[i]] = t
-        matrix[i, downlines_in[i]] = -1
-        # 压线是1-t，被压前是-1，被压后是t
-    # 计算行列式
-    # print(matrix)
-    # 一行行打印矩阵
-    for i in range(n):
-        print(matrix[i, :])
-    # 移除第一行和第一列
-    matrix.row_del(0)
-    matrix.col_del(0)
-    # print('Matrix after removing the first row and the first column:')
-    # for i in range(n-1):
-    #     print(matrix[i, :])
-    det = sp.det(matrix)
-    print("Det:\n", det)
-    lowest_term = det.as_ordered_terms()[-1] # 最低次项
-    # 获得最低次项的系数
-    print(f'Lowest term: {lowest_term}')
-    reduce_det = sp.div(det, lowest_term/abs(lowest_term.coeff(t)))[0]
-    print("Reduced Det:\n", reduce_det)
+
     pass    
 
 # 样例：
 if __name__ == "__main__":
+    # t = sp.symbols('t')
+    # matrix = sp.Matrix([[1-t,0,0,0,-1,t],[-1,t,0,0,1-t,0],[0,1-t,0,-1,t,0],[0,-1,t,1-t,0,0],[-1,0,1-t,0,0,t],[0,0,t,-1,0,1-t]])
+    # matrix.row_del(0)
+    # matrix.col_del(0)
+    # print(matrix)
+    # print(sp.det(matrix))
+
 
     # raw_data = np.array([[1,3,2], [3,1,2], [2,3,1]])-1
-    # raw_data = np.array([[0,2,3],[1,1,0],[2,3,0],[3,2,1]])
     # 3_1 trefoil
     # ANS: 1-t+t^2
 
@@ -126,12 +132,10 @@ if __name__ == "__main__":
     # 6_1
     # ANS: 2-5*t+2*t^2
 
-    raw_data = np.array([[3,6,1],[6,3,4],[1,6,5],[5,1,2],[2,5,4],[4,2,3]])-1
-    # 知乎中的例子
-    # ANS: -2t^3+5t^2-2t
+    # raw_data = np.array([[3,6,1],[6,3,4],[1,6,5],[5,1,2],[2,5,4],[4,2,3]])-1
+    # # 知乎中的例子
+    # # ANS: -2t^3+5t^2-2t
 
-    # raw_data = np.array([[0,0,1],[0,1,2],[0,2,3],[0,3,4],[0,0,4]])
-
-    straightened_data = straighten(raw_data)
-    alex_polynomial(straightened_data)
+    # straightened_data = straighten(raw_data)
+    # alex_polynomial(straightened_data)
     pass
