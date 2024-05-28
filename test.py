@@ -1,43 +1,33 @@
-import sympy as sp
+# import numpy as np
 
-def process_polynomial(poly):
-    t = sp.Symbol('t')
-    
-    # 获取多项式的常数项
-    const_term = poly.as_coefficients_dict().get(t**0, 0)
-    
-    if const_term != 0:
-        # 如果常数项非零
-        if const_term > 0:
-            return poly
-        else:
-            return -poly
-    else:
-        # 如果常数项为零
-        # 获取最低次幂项和其系数
-        terms = poly.as_ordered_terms()
-        lowest_term = terms[-1]
-        lowest_coeff, lowest_exp = lowest_term.as_coeff_exponent(t)
-        
-        if lowest_coeff < 0:
-            poly = -poly
+# edge_labels = [3,1,2,1]
+# edge_labels_shift = [1,2,1,3]
 
-        # 移除最低次幂的幂但保留其系数
-        lowest_monom = t**lowest_exp
-        poly = sp.div(poly, lowest_monom)[0]
+# unique_labels = np.unique(edge_labels)
 
-        
-        return poly
+# up_label, down_label_1, down_label_2 = -1, -1, -1
+# # 查看edge_labels和edge_labels_shift中是否有出现了三次的标签
+# for label in unique_labels:
+#     if edge_labels.count(label) == 3 or edge_labels_shift.count(label) == 3:
+#         up_label = label
+#         break
+#     if edge_labels.count(label) == 2 and edge_labels_shift.count(label) == 2:
+#         up_label = label
+#         break
 
-# 示例多项式
-t = sp.Symbol('t')
-poly1 = -2*t**3 + 3*t**2 - 2*t
-poly2 = t**4
-poly3 = t + 1
-poly4 = t - 1
+# if up_label == -1:
+#     print("No crossing")
+#     exit()
 
-# 处理并打印结果
-print(process_polynomial(poly1))  # 输出: 2*t**2 - 3*t + 2
-print(process_polynomial(poly2))  # 输出: 1
-print(process_polynomial(poly3))  # 输出: t + 1
-print(process_polynomial(poly4))  # 输出: -t + 1
+# [down_label_1, down_label_2] = [x for x in unique_labels if x != up_label]
+
+# print(up_label, down_label_1, down_label_2)
+
+import numpy as np
+
+window = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+
+
+edge_labels = np.concatenate([window[0:-1, 0], window[-1, :], window[-2:0:-1, -1], window[0, -1:0:-1]])
+
+print(edge_labels)

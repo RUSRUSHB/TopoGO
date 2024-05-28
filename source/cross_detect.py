@@ -7,28 +7,79 @@ def is_crossing(window, window_size):
     unique_labels, label_counts = np.unique(window, return_counts=True)
     background_label = unique_labels[-1]
     foreground_labels = unique_labels[unique_labels != background_label]
-
-    # 检查是否有足够数量的前景标签
-    if len(foreground_labels) <= 2:
+    # 检查是否有正确数量的前景标签
+    if len(foreground_labels) !=3:
         return False
 
-    # 找到数量最少的两个前景标签
-    min_count_indices = np.argsort(label_counts)[:2]  # 最小数量的两个标签
-    min_count_labels = unique_labels[min_count_indices]
-    min_count_values = label_counts[min_count_indices]
-    min_count = window_size * 1
 
-    # 检查最少的两个前景标签的数量是否满足要求
-    if min(min_count_values) < min_count:
+
+    # 创建围绕窗口的一个数组
+    edge_labels = np.concatenate([window[0:-1, 0], window[-1, :], window[-2:0:-1, -1], window[0, -1:0:-1]])
+    edge_labels_shift = np.roll(edge_labels, len(edge_labels) // 2)
+    # 去除背景标签
+
+    edge_labels = edge_labels[edge_labels != background_label]
+    edge_labels_shift = edge_labels_shift[edge_labels_shift != background_label]
+
+    # 遍历检查，如果当前标签和上一个标签一样，就删掉当前这一个
+    i = 0
+    while i < len(edge_labels) - 1:
+        if edge_labels[i] == edge_labels[i + 1]:
+            edge_labels = np.delete(edge_labels, i)
+        else:
+            i += 1
+    i = 0
+    while i < len(edge_labels_shift) - 1:
+        if edge_labels_shift[i] == edge_labels_shift[i + 1]:
+            edge_labels_shift = np.delete(edge_labels_shift, i)
+        else:
+            i += 1
+    print(f"edge_labels: {edge_labels}")
+    print(f"edge_labels_shift: {edge_labels_shift}")
+    unique_labels = np.unique(edge_labels)
+    # tolist
+    edge_labels = edge_labels.tolist()
+    print(f"unique_labels: {unique_labels}")
+    up_label, down_label_1, down_label_2 = -1, -1, -1
+    # 查看edge_labels和edge_labels_shift中是否有出现了三次的标签
+    for label in unique_labels:
+        if edge_labels.count(label) == 3 or edge_labels_shift.count(label) == 3:
+            up_label = label
+            break
+        if edge_labels.count(label) == 2 and edge_labels_shift.count(label) == 2:
+            up_label = label
+            break
+
+    if up_label == -1:
+        print("No crossing")
         return False
 
-    # 找到数量最多的一个前景标签
-    max_count_index = np.argmax(label_counts)
-    max_count_label = unique_labels[max_count_index]
-    max_count_value = label_counts[max_count_index]
-
-    # # 检查最多的前景标签的数量是否满足要求
-    if max_count_value < min_count*5:
+    [down_label_1, down_label_2] = [x for x in unique_labels if x != up_label]
+    
+    # l1 是max_count_label, l2 是min_count_labels[0], l3 是min_count_labels[1]
+    l1, l2, l3 = up_label, down_label_1, down_label_2
+    possible_labels_5 = [[l1,l3,l1,l2,l1], [l1,l2,l1,l3,l1], [l3,l1,l2,l1,l3], [l2,l1,l3,l1,l2]]
+    possible_labels_4 = [[l1,l3,l1,l2], [l1,l2,l1,l3], [l3,l1,l2,l1], [l2,l1,l3,l1]]
+    # print("Lines: ", l1, l2, l3)
+    # 长度为5的话，为13121,12131,31213,21312
+    edge_labels = edge_labels.tolist()
+    if len(edge_labels) == 5:
+        # print('Length 5')
+        for label in possible_labels_5:
+            if edge_labels == label:
+                # print('True label 5')
+                return True
+        # print('False label 5')
+        return False
+    # 长度为4的话，为1312,1213,3121,2131
+    elif len(edge_labels) == 4:
+        # print('Length 4')
+        for label in possible_labels_4:
+            if edge_labels == label:
+                # print('True label 4')
+                return True
+        
+        # print('False label 4')
         return False
 
     return True
