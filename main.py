@@ -9,7 +9,7 @@ from source.cross_detect import *
 from source.alex import *
 
 # read gif image
-img = load_image("img/rolfsen_all/10_162.png")
+img = load_image("img/rolfsen_all/10_160.png")
 windowSize = 24
 
 # visualize(img, 'Original Image')
