@@ -42,8 +42,8 @@ def straighten(raw_data: np.array)->np.array:
     # 提取除第一列外的所有列
     raw_downlines = raw_data[:, 1:]
 
-    print("Uplines:\n", raw_uplines)
-    print("Downlines:\n", raw_downlines)
+    # print("Uplines:\n", raw_uplines)
+    # print("Downlines:\n", raw_downlines)
 
     # 1. 从第一个crossing开始
     crossing_list = [0]  # 从原始数据的第一个crossing开始
@@ -53,8 +53,12 @@ def straighten(raw_data: np.array)->np.array:
 
 
     for i in range(crossing_num):
+    # while (len(crossing_list) < crossing_num):
         for j in range(crossing_num):
-            if j != i and target in raw_downlines[j] and j not in crossing_list:
+            # if target in raw_downlines[j] and j not in crossing_list:
+            if target in raw_downlines[j] and j not in crossing_list:
+            # if j != i and target in raw_downlines[j] and j not in crossing_list:
+
                 # 如果这个crossing的downlines中有target，且这个crossing没有被访问过
 
                 crossing_list.append(j)
@@ -64,9 +68,15 @@ def straighten(raw_data: np.array)->np.array:
                 start_line_list.append(target)
                 
                 break
+    ########未知原因
     
-    print("Start Line list:", start_line_list)
-    print("Crossing list:", crossing_list)
+    # if len(crossing_list) != crossing_num:
+        # print(f'Warning: missing {crossing_num - len(crossing_list)} crossings.')
+        # crossing_list.append([x for x in range(crossing_num) if x not in crossing_list][0])
+        # start_line_list.append([x for x in raw_downlines[crossing_list[-1]] if x != start_line_list[-1]][0])
+    ###########
+    # print("Start Line list:\n", start_line_list)
+    # print("Crossing list:\n", crossing_list)
     
     straight_data = np.zeros([crossing_num, 4], dtype=int)
     # 按照crossing_list的顺序，将raw_data的数据按照start_line_list的顺序填入
@@ -76,8 +86,37 @@ def straighten(raw_data: np.array)->np.array:
         straight_data[i, 2] = start_line_list[i]
         straight_data[i, 3] = [x for x in raw_downlines[crossing_list[i]] if x != straight_data[i, 2]][0]
 
-    print("Straight data:\nCrossing|Upline|Downline_out|Downline_in\n", straight_data)
+    # print("Straight data:\nCrossing|Upline|Downline_out|Downline_in\n", straight_data)
     return straight_data
+
+def reduce_polynomial(poly):
+    t = sp.Symbol('t')
+    
+    # 获取多项式的常数项
+    const_term = poly.as_coefficients_dict().get(t**0, 0)
+    
+    if const_term != 0:
+        # 如果常数项非零
+        if const_term > 0:
+            return poly
+        else:
+            return -poly
+    else:
+        # 如果常数项为零
+        # 获取最低次幂项和其系数
+        terms = poly.as_ordered_terms()
+        lowest_term = terms[-1]
+        lowest_coeff, lowest_exp = lowest_term.as_coeff_exponent(t)
+        
+        if lowest_coeff < 0:
+            poly = -poly
+
+        # 移除最低次幂的幂但保留其系数
+        lowest_monom = t**lowest_exp
+        poly = sp.div(poly, lowest_monom)[0]
+
+        
+        return poly
 
 def alex_polynomial(straight_data: np.array)->np.array:
     # upline: 1-t; downline_out: t; downline_in: -1
@@ -97,8 +136,9 @@ def alex_polynomial(straight_data: np.array)->np.array:
     # 计算行列式
     # print(matrix)
     # 一行行打印矩阵
-    for i in range(n):
-        print(matrix[i, :])
+    # for i in range(n):
+    #     print(matrix[i, :])
+    
     # 移除第一行和第一列
     matrix.row_del(0)
     matrix.col_del(0)
@@ -106,13 +146,14 @@ def alex_polynomial(straight_data: np.array)->np.array:
     # for i in range(n-1):
     #     print(matrix[i, :])
     det = sp.det(matrix)
-    print("Det:\n", det)
-    lowest_term = det.as_ordered_terms()[-1] # 最低次项
-    # 获得最低次项的系数
-    print(f'Lowest term: {lowest_term}')
-    reduce_det = sp.div(det, lowest_term/abs(lowest_term.coeff(t)))[0]
-    print("Reduced Det:\n", reduce_det)
-    pass
+    # print("Det:\n", det)
+
+
+    # 将行列式除以最低次项的变量部分并保留符号
+    reduced_det = reduce_polynomial(det)
+    #     reduced_det = reduce_polynomial(det).as_ordered_terms(order='lex')
+    # print("Reduced Det:\n", reduced_det)
+    return [reduced_det, det]
 
 # 样例：
 if __name__ == "__main__":

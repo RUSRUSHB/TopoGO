@@ -75,6 +75,45 @@ def unify_non_line_segments(labels, classification):
     return labels
 
 
+def extractLabelsFromCross_detect(crossings):
+    """
+    提取出top和bottom从crossings
+    """
+    crossings_arr = np.zeros((len(crossings), 3), dtype=int)
+    for i, crossing in enumerate(crossings):
+        x, y, top_line, bottom_line = crossing
+        crossings_arr[i, 0] = top_line[0]
+        crossings_arr[i, 1] = bottom_line[0]
+        crossings_arr[i, 2] = bottom_line[1]
+    return crossings_arr
+
+
+def unifyCrossings(crossings_arr):
+    """
+    格式化crossings，使其每一个子数组的第一个数成为从0开始的整数，保持映射不变
+    input：
+    array([[ 2,  1,  8],
+       [ 8,  2,1],
+       [ 1,  2,  8]])
+    Output:
+    array([[ 0,  2,  1],
+       [ 1,  0,  2],
+       [ 2,  0,  1]])
+    """
+    unified_crossings = crossings_arr
+    unique_labels = np.unique(crossings_arr)
+    label_mapping = dict(zip(unique_labels, np.arange(len(unique_labels))))
+    for i in range(len(crossings_arr)):
+        for j in range(3):
+            unified_crossings[i, j] = label_mapping[crossings_arr[i, j]]
+
+    # print("unified_crossings:", unified_crossings)
+    # 再给unified_crossings排序，使得第一列是从0开始的整数，保持映射不变
+    unified_crossings = unified_crossings[np.argsort(unified_crossings[:, 0])]
+
+    return unified_crossings
+
+
 # if __name__ == '__main__':
 #     # 示例使用
 #     classification = {1: True, 2: False,
