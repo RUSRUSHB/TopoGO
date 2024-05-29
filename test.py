@@ -23,11 +23,17 @@
 
 # print(up_label, down_label_1, down_label_2)
 
+# import numpy as np
+
+# window = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+
+
+# edge_labels = np.concatenate([window[0:-1, 0], window[-1, :], window[-2:0:-1, -1], window[0, -1:0:-1]])
+
+# print(edge_labels)
+
 import numpy as np
 
-window = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-
-
-edge_labels = np.concatenate([window[0:-1, 0], window[-1, :], window[-2:0:-1, -1], window[0, -1:0:-1]])
-
+edge_labels = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
 print(edge_labels)
+print(edge_labels.tolist())

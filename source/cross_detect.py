@@ -10,6 +10,14 @@ def is_crossing(window, window_size):
     # 检查是否有正确数量的前景标签
     if len(foreground_labels) !=3:
         return False
+    # 所有标签的面积都必须大于一个值
+    for label in unique_labels:
+        if np.sum(window == label) < 5:
+            return False
+    # 最大标签的面积必须大于一个值
+    if np.sum(window == np.max(window)) < 20:
+        return False
+
 
 
 
@@ -18,10 +26,15 @@ def is_crossing(window, window_size):
     edge_labels_shift = np.roll(edge_labels, len(edge_labels) // 2)
     # 去除背景标签
 
+
+
+
     edge_labels = edge_labels[edge_labels != background_label]
     edge_labels_shift = edge_labels_shift[edge_labels_shift != background_label]
 
+    # 兼并相同的标签，保留交替信息
     # 遍历检查，如果当前标签和上一个标签一样，就删掉当前这一个
+    
     i = 0
     while i < len(edge_labels) - 1:
         if edge_labels[i] == edge_labels[i + 1]:
@@ -34,12 +47,14 @@ def is_crossing(window, window_size):
             edge_labels_shift = np.delete(edge_labels_shift, i)
         else:
             i += 1
-    print(f"edge_labels: {edge_labels}")
-    print(f"edge_labels_shift: {edge_labels_shift}")
+    # print(f"edge_labels: {edge_labels}")
+    # print(f"edge_labels_shift: {edge_labels_shift}")
     unique_labels = np.unique(edge_labels)
     # tolist
     edge_labels = edge_labels.tolist()
-    print(f"unique_labels: {unique_labels}")
+    edge_labels_shift = edge_labels_shift.tolist()
+    # print(edge_labels)
+    # print(f"unique_labels: {unique_labels}")
     up_label, down_label_1, down_label_2 = -1, -1, -1
     # 查看edge_labels和edge_labels_shift中是否有出现了三次的标签
     for label in unique_labels:
@@ -51,36 +66,51 @@ def is_crossing(window, window_size):
             break
 
     if up_label == -1:
-        print("No crossing")
+        # print("No crossing")
         return False
 
     [down_label_1, down_label_2] = [x for x in unique_labels if x != up_label]
     
-    # l1 是max_count_label, l2 是min_count_labels[0], l3 是min_count_labels[1]
     l1, l2, l3 = up_label, down_label_1, down_label_2
+    # 数学分析可得所有可能的交替顺序
     possible_labels_5 = [[l1,l3,l1,l2,l1], [l1,l2,l1,l3,l1], [l3,l1,l2,l1,l3], [l2,l1,l3,l1,l2]]
     possible_labels_4 = [[l1,l3,l1,l2], [l1,l2,l1,l3], [l3,l1,l2,l1], [l2,l1,l3,l1]]
     # print("Lines: ", l1, l2, l3)
     # 长度为5的话，为13121,12131,31213,21312
-    edge_labels = edge_labels.tolist()
+    # edge_labels = edge_labels.tolist()
+    is_true_alternating = False
     if len(edge_labels) == 5:
         # print('Length 5')
         for label in possible_labels_5:
             if edge_labels == label:
                 # print('True label 5')
-                return True
+                is_true_alternating = True
         # print('False label 5')
-        return False
     # 长度为4的话，为1312,1213,3121,2131
     elif len(edge_labels) == 4:
         # print('Length 4')
         for label in possible_labels_4:
             if edge_labels == label:
                 # print('True label 4')
-                return True
+                is_true_alternating = True
         
         # print('False label 4')
+
+    if not is_true_alternating:
         return False
+    # print('pass alternating')
+
+    # 不同前景标签的相互最小距离必须小于5
+    for i in range(len(foreground_labels)):
+        for j in range(i+1, len(foreground_labels)):
+            label1 = foreground_labels[i]
+            label2 = foreground_labels[j]
+            label1_coords = np.argwhere(window == label1)
+            label2_coords = np.argwhere(window == label2)
+            min_dist = np.min(np.linalg.norm(label1_coords[:, None] - label2_coords, axis=-1))
+            if min_dist > 20:
+                # print(f"min_dist: {min_dist}")
+                return False
 
     return True
 
@@ -90,8 +120,11 @@ def find_crossings(labels, window_size=5):
     half_window = window_size // 2
     crossings = []
 
-    for y in range(half_window, height - half_window, int(half_window/6)):
-        for x in range(half_window, width - half_window, int(half_window/6)):
+    # for y in range(half_window, height - half_window, int(half_window/6)):
+    #     for x in range(half_window, width - half_window, int(half_window/6)):
+    
+    for y in range(half_window, height - half_window, 1):
+        for x in range(half_window, width - half_window, 1):
             window = labels[y - half_window:y + half_window +
                             1, x - half_window:x + half_window + 1]
             if is_crossing(window, window_size):
