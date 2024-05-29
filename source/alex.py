@@ -65,16 +65,11 @@ def straighten(raw_data: np.array)->np.array:
                 target = [x for x in raw_downlines[j] if x != target][0]
                 # 从这个crossing的downlines中找到不是target（也就是另外一个）的那个downline
                 # [0]是因为它返回的是一个列表，而不是一个数字。而这个列表长度必为1
+                # TODO: 长度不为一的话报错
                 start_line_list.append(target)
                 
                 break
-    ########未知原因
-    
-    # if len(crossing_list) != crossing_num:
-        # print(f'Warning: missing {crossing_num - len(crossing_list)} crossings.')
-        # crossing_list.append([x for x in range(crossing_num) if x not in crossing_list][0])
-        # start_line_list.append([x for x in raw_downlines[crossing_list[-1]] if x != start_line_list[-1]][0])
-    ###########
+
     # print("Start Line list:\n", start_line_list)
     # print("Crossing list:\n", crossing_list)
     
@@ -95,6 +90,10 @@ def reduce_polynomial(poly):
     # 获取多项式的常数项
     const_term = poly.as_coefficients_dict().get(t**0, 0)
     
+    '''
+    消掉多余的t^n或者-t^n，使得多项式的最低次幂项为正整数（注意不要改变系数大小）
+    '''
+
     if const_term != 0:
         # 如果常数项非零
         if const_term > 0:
