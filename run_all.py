@@ -14,7 +14,7 @@ import re
 # do the error handling for the case when error occurs
 # 按数字顺序读文件
 # 获取文件夹中所有文件的文件名并按字母顺序排序
-file_list = sorted(os.listdir("img/rolfsen_all"))
+file_list = sorted(os.listdir("img/rolfsen_all_no_wrong"))
 
 start_time = time.time()
 def sort_key(filename):
@@ -22,7 +22,7 @@ def sort_key(filename):
     return list(map(int, re.findall(r'\d+', filename)))
 
 
-file_list = sorted(os.listdir("img/rolfsen_all"), key=sort_key)
+file_list = sorted(os.listdir("img/rolfsen_all_no_wrong"), key=sort_key)
 success = 0
 # 处理文件夹中的所有图像
 windowSizes = [27, 30, 24, 20, 16] # 尝试的windowSize备选值
@@ -33,7 +33,7 @@ for filename in file_list:
 
     while True:  # 循环直到不再遇到异常或者没有更多备选的windowSize
         try:
-            img = load_image("img/rolfsen_all/" + filename)
+            img = load_image("img/rolfsen_all_no_wrong/" + filename)
             # visualize(img, 'Original Image')
 
             bi_img = binarize(img)
@@ -84,7 +84,7 @@ for filename in file_list:
             else:
                 print(f'{filename}: All attempts failed')
                 # save this picture to the error folder
-                save_image(bi_img, f'output/error/{filename}')
+                # save_image(bi_img, f'output/error/advance_cross_4/{filename}')
                 break
 
 print(f"Successfully processed {success} images.")

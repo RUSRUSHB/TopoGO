@@ -23,61 +23,46 @@ def separate_labels(input_array):
 
 
 def is_line_segment(layer):
-    # 确保掩码是单通道的8位无符号整数图像
     label = layer.max()
     mask = layer.astype(np.uint8)
 
     # 查找轮廓
-    contours, _ = cv2.findContours(
-        mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # 创建一个空白图像来绘制轮廓
-    contour_img = np.zeros_like(mask)
-
-    # 绘制轮廓
-    cv2.drawContours(contour_img, contours, -1, (255), thickness=cv2.FILLED)
-
-    # 距离变换
-    dist_transform = cv2.distanceTransform(
-        contour_img, cv2.DIST_L2, cv2.DIST_MASK_PRECISE)
-
-    # 查找距离变换结果中的最大值和对应位置
-    _, max_val, _, max_loc = cv2.minMaxLoc(dist_transform)
-
-    # 查找轮廓
-    contours, _ = cv2.findContours(
-        mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     if len(contours) == 0:
-        return label, 0  # 没有找到任何轮廓
+        return label, 0, 0  # 没有找到任何轮廓
 
     contour = contours[0]
-    plotTheCircle = False
-    if (plotTheCircle):
-        # plot the contour with circle in a new image
-        img = np.zeros_like(mask)
-        cv2.drawContours(img, [contour], -1, 255, 1)
-        cv2.circle(img, max_loc, int(max_val), 255, 1)
-        plt.imshow(img, cmap='gray')
-        plt.show()
 
-    return label, int(max_val)
+    # 距离变换
+    contour_img = np.zeros_like(mask)
+    cv2.drawContours(contour_img, contours, -1, (255), thickness=cv2.FILLED)
+    dist_transform = cv2.distanceTransform(contour_img, cv2.DIST_L2, cv2.DIST_MASK_PRECISE)
+    _, max_val, _, _ = cv2.minMaxLoc(dist_transform)
+
+    # 计算最小外接圆
+    (x, y), min_enclosing_radius = cv2.minEnclosingCircle(contour)
+
+    return label, int(max_val), min_enclosing_radius
+
 
 
 def classify_segments(segmented_image):
-
     classification = {}
     radii = np.zeros(len(segmented_image))
+    min_enclosing_radii = np.zeros(len(segmented_image))
 
     # Calculate radii for each segment
     for i, layer in enumerate(segmented_image):
-        label, radii[i] = is_line_segment(layer)
-        classification[label] = radii[i]
+        label, max_val, min_enclosing_radius = is_line_segment(layer)
+        radii[i] = max_val
+        min_enclosing_radii[i] = min_enclosing_radius
+        classification[label] = (max_val, min_enclosing_radius)
     # print(f'radii: {radii}')
     # Sort radii and remove outliers
     radii_sorted = np.sort(radii)
     percentile = int(len(radii_sorted) * 0.1)
-    if (percentile == 0):
+    if percentile == 0:
         percentile = 1
     radii_filtered = radii_sorted[percentile:-percentile]
 
@@ -89,11 +74,13 @@ def classify_segments(segmented_image):
     line_width = radii_filtered[0]
     # print(f'line_width: {line_width}')
 
-    # Classify segments based on line width
-    for label, radius in classification.items():
-        if abs(radius - line_width) < 0.4 * line_width:
+    # Classify segments based on line width and minimum enclosing radius
+    for label, (radius, min_enclosing_radius) in classification.items():
+        if (abs(radius - line_width) < 0.4 * line_width) and (min_enclosing_radius >= 3 * line_width):
+        # if (abs(radius - line_width) < 0.4 * line_width) and (min_enclosing_radius >= 3 * line_width):
             classification[label] = True
         else:
             classification[label] = False
 
     return classification
+
