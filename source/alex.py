@@ -9,30 +9,6 @@ c_i=[upline, downlines[0], downlines[1]]
 
 '''
 
-def straighten_fixed(picture: np.array, crossing_data: np.array, windows_loc: np.array, window_size)->np.array:
-    colored_picture = np.zeros_like(picture)
-    colored_picture[picture == max(picture.flatten())] = 255
-    # 背景上色为255
-
-    raw_uplines = crossing_data[:, 0]
-    raw_downlines = crossing_data[:, 1:]
-
-    print("Uplines:\n", raw_uplines)
-    print("Downlines:\n", raw_downlines)
-
-    crossing_num = len(raw_data)
-    windows_list = picture[windows_loc[0]:windows_loc[0]+window_size, windows_loc[1]:windows_loc[1]+window_size]
-
-    start_line_list = [raw_downlines[0, 0]]# 从第一个crossing的第一个downline开始
-    target = raw_downlines[0, 0]
-
-    # window中label为target的像素点的坐标，选取第一个点作为seed
-    for i in range(crossing_num):
-        seed = np.where(windows_list == target)[0][0]
-        # 染色算法，向四联通方向扩展
-        colored_picture
-
-    pass
 
 def straighten(raw_data: np.array)->np.array:
     
