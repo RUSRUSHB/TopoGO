@@ -58,7 +58,7 @@ for filename in file_list:
 
         # straightened_data = straighten(np.array(mapped_crossings))
         # print(f'{filename} is: {alex_polynomial(straightened_data)}')
-        # success += 1
+        success += 1
     
     except Exception as e:
         print(f"Error processing {filename}")
