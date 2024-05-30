@@ -13,7 +13,7 @@ import re
 # do the error handling for the case when error occurs
 # 按数字顺序读文件
 # 获取文件夹中所有文件的文件名并按字母顺序排序
-file_list = sorted(os.listdir("img/extended_rolfsen_all_no_wrong"))
+file_list = sorted(os.listdir("img/rolfsen_all_no_wrong"))
 
 def sort_key(filename):
     # 提取文件名中的数字部分用于排序
@@ -21,17 +21,19 @@ def sort_key(filename):
 
 # def fast_action(filename):
 #     #只进行操作，尽可能快速
-#     labels, _, _ = arrange_labels(segment_image(binarize(load_image("img/extended_rolfsen_all_no_wrong/" + filename))))
-#     straightened_data = straighten(np.array(map_labels_to_consecutive_integers(examine_crossings(extract_centerlines_for_labels(unify_non_line_segments(labels, classify_segments(separate_labels(arrange_labels(segment_image(binarize(load_image("img/extended_rolfsen_all_no_wrong/" + filename))))[0]))))[1:-1, 1:-1]))[0]))
+#     labels, _, _ = arrange_labels(segment_image(binarize(load_image("img/rolfsen_all_no_wrong/" + filename))))
+#     straightened_data = straighten(np.array(map_labels_to_consecutive_integers(examine_crossings(extract_centerlines_for_labels(unify_non_line_segments(labels, classify_segments(separate_labels(arrange_labels(segment_image(binarize(load_image("img/rolfsen_all_no_wrong/" + filename))))[0]))))[1:-1, 1:-1]))[0]))
 #     print(f'{filename} is: {alex_polynomial(straightened_data)}')
 #     success += 1
 #     pass
 def fast_actions(filename):
-    labels = arrange_labels(segment_image(binarize(load_image("img/extended_rolfsen_all_no_wrong/" + filename)))[0])
-    print(f'{filename} is: {alex_polynomial(straighten(np.array(map_labels_to_consecutive_integers(examine_crossings(extract_centerlines_for_labels(unify_non_line_segments(labels, classify_segments(separate_labels(labels))))[1:-1, 1:-1]))[0])))}')
+    labels = arrange_labels(segment_image(binarize(load_image("img/rolfsen_all_no_wrong/" + filename)))[0])
+    # print(f'{filename} is: {alex_polynomial(straighten(np.array(map_labels_to_consecutive_integers(examine_crossings(extract_centerlines_for_labels(unify_non_line_segments(labels, classify_segments(separate_labels(labels))))[1:-1, 1:-1]))[0])))}')
+
+    alex_polynomial(straighten(np.array(map_labels_to_consecutive_integers(examine_crossings(extract_centerlines_for_labels(unify_non_line_segments(labels, classify_segments(separate_labels(labels))))[1:-1, 1:-1]))[0])))
     pass
 
-file_list = sorted(os.listdir("img/extended_rolfsen_all_no_wrong"), key=sort_key)
+file_list = sorted(os.listdir("img/rolfsen_all_no_wrong"), key=sort_key)
 success = 0
 start_time = time.time()
 
@@ -40,7 +42,7 @@ for filename in file_list:
     
     try:
         fast_actions(filename)
-        # img = load_image("img/extended_rolfsen_all_no_wrong/" + filename)
+        # img = load_image("img/rolfsen_all_no_wrong/" + filename)
         
         # bi_img = binarize(img)
         # labels = arrange_labels(segment_image(bi_img)[0])
