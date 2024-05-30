@@ -56,8 +56,10 @@ def straighten(raw_data: np.array)->np.array:
         straight_data[i, 1] = raw_uplines[crossing_list[i]]
         straight_data[i, 2] = start_line_list[i]
         straight_data[i, 3] = [x for x in raw_downlines[crossing_list[i]] if x != straight_data[i, 2]][0]
+    # 根据第一列的数值，将数据排序
+    straight_data = straight_data[straight_data[:, 1].argsort()]
 
-    # print("Straight data:\nCrossing|Upline|Downline_out|Downline_in\n", straight_data)
+    print("Straight data:\nCross|Up|Down_out|Down_in\n", straight_data)
     return straight_data
 
 def reduce_polynomial(poly):
@@ -127,7 +129,7 @@ def alex_polynomial(straight_data: np.array)->np.array:
     # 将行列式除以最低次项的变量部分并保留符号
     reduced_det = reduce_polynomial(det)
     #     reduced_det = reduce_polynomial(det).as_ordered_terms(order='lex')
-    # print("Reduced Det:\n", reduced_det)
+    print("Reduced Det:\n", reduced_det)
     return [reduced_det, det]
 
 # 样例：
@@ -138,11 +140,11 @@ if __name__ == "__main__":
     # 3_1 trefoil
     # ANS: 1-t+t^2
     
-    # raw_data = np.array([[1,2,0], [0,2,5],[3,4,1],[2,1,3],[4,5,3],[5,4,0]])
+    raw_data = np.array([[1,2,0], [0,2,5],[3,4,1],[2,1,3],[4,5,3],[5,4,0]])
     # 6_1
     # ANS: 2-5*t+2*t^2
 
-    raw_data = np.array([[3,6,1],[6,3,4],[1,6,5],[5,1,2],[2,5,4],[4,2,3]])-1
+    # raw_data = np.array([[3,6,1],[6,3,4],[1,6,5],[5,1,2],[2,5,4],[4,2,3]])-1
     # 知乎中的例子
     # ANS: -2t^3+5t^2-2t
 
