@@ -101,16 +101,16 @@ def is_crossing(window, window_size):
     # print('pass alternating')
 
     # 不同前景标签的相互最小距离必须小于5
-    for i in range(len(foreground_labels)):
-        for j in range(i+1, len(foreground_labels)):
-            label1 = foreground_labels[i]
-            label2 = foreground_labels[j]
-            label1_coords = np.argwhere(window == label1)
-            label2_coords = np.argwhere(window == label2)
-            min_dist = np.min(np.linalg.norm(label1_coords[:, None] - label2_coords, axis=-1))
-            if min_dist > 20:
-                # print(f"min_dist: {min_dist}")
-                return False
+    # for i in range(len(foreground_labels)):
+    #     for j in range(i+1, len(foreground_labels)):
+    #         label1 = foreground_labels[i]
+    #         label2 = foreground_labels[j]
+    #         label1_coords = np.argwhere(window == label1)
+    #         label2_coords = np.argwhere(window == label2)
+    #         min_dist = np.min(np.linalg.norm(label1_coords[:, None] - label2_coords, axis=-1))
+    #         if min_dist > 20:
+    #             # print(f"min_dist: {min_dist}")
+    #             return False
 
     return True
 
