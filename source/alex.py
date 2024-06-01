@@ -56,10 +56,11 @@ def straighten(raw_data: np.array)->np.array:
         straight_data[i, 1] = raw_uplines[crossing_list[i]]
         straight_data[i, 2] = start_line_list[i]
         straight_data[i, 3] = [x for x in raw_downlines[crossing_list[i]] if x != straight_data[i, 2]][0]
-    # 根据第一列的数值，将数据排序
-    straight_data = straight_data[straight_data[:, 1].argsort()]
 
-    print("Straight data:\nCross|Up|Down_out|Down_in\n", straight_data)
+
+
+
+    # print("Straight data:\nCross|Up|Down_out|Down_in\n", straight_data)
     return straight_data
 
 def reduce_polynomial(poly):
@@ -101,9 +102,27 @@ def alex_polynomial(straight_data: np.array)->np.array:
     t = sp.symbols('t')
     # 生成矩阵
     n = len(straight_data)
+    
+
     uplines = straight_data[:, 1]
     downlines_out = straight_data[:, 2]
     downlines_in = straight_data[:, 3]
+    # print(f'Lines matrix:\n{uplines}\n{downlines_out}\n{downlines_in}')
+
+    # 进行一个映射：uplines的第i个元素要被映射为i
+    mapped_lines = np.array([i for i in range(n)])
+    # print(f'mapped_uplines: {mapped_uplines}')
+    mapping = dict(zip(downlines_out,mapped_lines))
+    # print(f'Mapping: {mapping}')
+
+    # downlines接受mapping
+    uplines = np.array([mapping[x] for x in uplines])
+    downlines_out = np.array([mapping[x] for x in downlines_out])
+    downlines_in = np.array([mapping[x] for x in downlines_in])
+    # 将他们reshape为竖着的向量
+    
+    # print(f'Mapped Lines matrix:\n{uplines}\n{downlines_out}\n{downlines_in}')
+
     matrix = sp.zeros(n)
     for i in range(n):
         matrix[i, uplines[i]] = 1-t
@@ -129,7 +148,7 @@ def alex_polynomial(straight_data: np.array)->np.array:
     # 将行列式除以最低次项的变量部分并保留符号
     reduced_det = reduce_polynomial(det)
     #     reduced_det = reduce_polynomial(det).as_ordered_terms(order='lex')
-    print("Reduced Det:\n", reduced_det)
+    # print("Reduced Det:\n", reduced_det)
     return [reduced_det, det]
 
 # 样例：
