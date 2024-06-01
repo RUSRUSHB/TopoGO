@@ -22,103 +22,103 @@ def is_crossing(window, window_size):
 
 
     # 创建围绕窗口的一个数组
-    edge_labels = np.concatenate([window[0:-1, 0], window[-1, :], window[-2:0:-1, -1], window[0, -1:0:-1]])
-    edge_labels_shift = np.roll(edge_labels, len(edge_labels) // 2)
-    # 去除背景标签
+    # edge_labels = np.concatenate([window[0:-1, 0], window[-1, :], window[-2:0:-1, -1], window[0, -1:0:-1]])
+    # edge_labels_shift = np.roll(edge_labels, len(edge_labels) // 2)
+    # # 去除背景标签
 
 
 
 
-    edge_labels = edge_labels[edge_labels != background_label]
-    edge_labels_shift = edge_labels_shift[edge_labels_shift != background_label]
+    # edge_labels = edge_labels[edge_labels != background_label]
+    # edge_labels_shift = edge_labels_shift[edge_labels_shift != background_label]
 
-    # 兼并相同的标签，保留交替信息
-    # 遍历检查，如果当前标签和上一个标签一样，就删掉当前这一个
+    # # 兼并相同的标签，保留交替信息
+    # # 遍历检查，如果当前标签和上一个标签一样，就删掉当前这一个
     
-    i = 0
-    while i < len(edge_labels) - 1:
-        if edge_labels[i] == edge_labels[i + 1]:
-            edge_labels = np.delete(edge_labels, i)
-        else:
-            i += 1
-    i = 0
-    while i < len(edge_labels_shift) - 1:
-        if edge_labels_shift[i] == edge_labels_shift[i + 1]:
-            edge_labels_shift = np.delete(edge_labels_shift, i)
-        else:
-            i += 1
-    # print(f"edge_labels: {edge_labels}")
-    # print(f"edge_labels_shift: {edge_labels_shift}")
-    # 如果第一个标签和最后一个标签一样，就删掉最后一个
-    if edge_labels[0] == edge_labels[-1]:
-        edge_labels = edge_labels[:-1]
+    # i = 0
+    # while i < len(edge_labels) - 1:
+    #     if edge_labels[i] == edge_labels[i + 1]:
+    #         edge_labels = np.delete(edge_labels, i)
+    #     else:
+    #         i += 1
+    # i = 0
+    # while i < len(edge_labels_shift) - 1:
+    #     if edge_labels_shift[i] == edge_labels_shift[i + 1]:
+    #         edge_labels_shift = np.delete(edge_labels_shift, i)
+    #     else:
+    #         i += 1
+    # # print(f"edge_labels: {edge_labels}")
+    # # print(f"edge_labels_shift: {edge_labels_shift}")
+    # # 如果第一个标签和最后一个标签一样，就删掉最后一个
+    # if edge_labels[0] == edge_labels[-1]:
+    #     edge_labels = edge_labels[:-1]
 
 
-    unique_labels = np.unique(edge_labels)
-    # tolist
-    edge_labels = edge_labels.tolist()
-    edge_labels_shift = edge_labels_shift.tolist()
-    # print(edge_labels)
-    # print(f"unique_labels: {unique_labels}")
-    up_label, down_label_1, down_label_2 = -1, -1, -1
-    # 查看edge_labels和edge_labels_shift中是否有出现了三次的标签
-    for label in unique_labels:
-        if edge_labels.count(label) == 3 or edge_labels_shift.count(label) == 3:
-            up_label = label
-            break
-        if edge_labels.count(label) == 2 and edge_labels_shift.count(label) == 2:
-            up_label = label
-            break
+    # unique_labels = np.unique(edge_labels)
+    # # tolist
+    # edge_labels = edge_labels.tolist()
+    # edge_labels_shift = edge_labels_shift.tolist()
+    # # print(edge_labels)
+    # # print(f"unique_labels: {unique_labels}")
+    # up_label, down_label_1, down_label_2 = -1, -1, -1
+    # # 查看edge_labels和edge_labels_shift中是否有出现了三次的标签
+    # for label in unique_labels:
+    #     if edge_labels.count(label) == 3 or edge_labels_shift.count(label) == 3:
+    #         up_label = label
+    #         break
+    #     if edge_labels.count(label) == 2 and edge_labels_shift.count(label) == 2:
+    #         up_label = label
+    #         break
 
-    if up_label == -1:
-        # print("No crossing")
-        return False
+    # if up_label == -1:
+    #     # print("No crossing")
+    #     return False
 
-    [down_label_1, down_label_2] = [x for x in unique_labels if x != up_label]
+    # [down_label_1, down_label_2] = [x for x in unique_labels if x != up_label]
     
-    l1, l2, l3 = up_label, down_label_1, down_label_2
-    # # 数学分析可得所有可能的交替顺序
-    # possible_labels_5 = [[l1,l3,l1,l2,l1], [l1,l2,l1,l3,l1], [l3,l1,l2,l1,l3], [l2,l1,l3,l1,l2]]
-    # possible_labels_4 = [[l1,l3,l1,l2], [l1,l2,l1,l3], [l3,l1,l2,l1], [l2,l1,l3,l1]]
-    # # print("Lines: ", l1, l2, l3)
-    # # 长度为5的话，为13121,12131,31213,21312
-    # # edge_labels = edge_labels.tolist()
-    # is_true_alternating = False
-    # if len(edge_labels) == 5:
-    #     # print('Length 5')
-    #     for label in possible_labels_5:
-    #         if edge_labels == label:
-    #             # print('True label 5')
-    #             is_true_alternating = True
-    #     # print('False label 5')
-    # # 长度为4的话，为1312,1213,3121,2131
-    # elif len(edge_labels) == 4:
-    #     # print('Length 4')
-    #     for label in possible_labels_4:
-    #         if edge_labels == label:
-    #             # print('True label 4')
-    #             is_true_alternating = True
+    # l1, l2, l3 = up_label, down_label_1, down_label_2
+    # # # 数学分析可得所有可能的交替顺序
+    # # possible_labels_5 = [[l1,l3,l1,l2,l1], [l1,l2,l1,l3,l1], [l3,l1,l2,l1,l3], [l2,l1,l3,l1,l2]]
+    # # possible_labels_4 = [[l1,l3,l1,l2], [l1,l2,l1,l3], [l3,l1,l2,l1], [l2,l1,l3,l1]]
+    # # # print("Lines: ", l1, l2, l3)
+    # # # 长度为5的话，为13121,12131,31213,21312
+    # # # edge_labels = edge_labels.tolist()
+    # # is_true_alternating = False
+    # # if len(edge_labels) == 5:
+    # #     # print('Length 5')
+    # #     for label in possible_labels_5:
+    # #         if edge_labels == label:
+    # #             # print('True label 5')
+    # #             is_true_alternating = True
+    # #     # print('False label 5')
+    # # # 长度为4的话，为1312,1213,3121,2131
+    # # elif len(edge_labels) == 4:
+    # #     # print('Length 4')
+    # #     for label in possible_labels_4:
+    # #         if edge_labels == label:
+    # #             # print('True label 4')
+    # #             is_true_alternating = True
         
-    #     # print('False label 4')
-    possible_labels = [[l1,l2,l1,l3],[l1,l3,l1,l2],[l2,l1,l3,l1],[l3,l1,l2,l1]]
-    for label in possible_labels:
-        if edge_labels == label:
-            is_true_alternating = True
-    if not is_true_alternating:
-        return False
-    # print('pass alternating')
+    # #     # print('False label 4')
+    # possible_labels = [[l1,l2,l1,l3],[l1,l3,l1,l2],[l2,l1,l3,l1],[l3,l1,l2,l1]]
+    # for label in possible_labels:
+    #     if edge_labels == label:
+    #         is_true_alternating = True
+    # if not is_true_alternating:
+    #     return False
+    # # print('pass alternating')
 
-    # 不同前景标签的相互最小距离必须小于5
-    for i in range(len(foreground_labels)):
-        for j in range(i+1, len(foreground_labels)):
-            label1 = foreground_labels[i]
-            label2 = foreground_labels[j]
-            label1_coords = np.argwhere(window == label1)
-            label2_coords = np.argwhere(window == label2)
-            min_dist = np.min(np.linalg.norm(label1_coords[:, None] - label2_coords, axis=-1))
-            if min_dist > 20:
-                # print(f"min_dist: {min_dist}")
-                return False
+    # # 不同前景标签的相互最小距离必须小于5
+    # for i in range(len(foreground_labels)):
+    #     for j in range(i+1, len(foreground_labels)):
+    #         label1 = foreground_labels[i]
+    #         label2 = foreground_labels[j]
+    #         label1_coords = np.argwhere(window == label1)
+    #         label2_coords = np.argwhere(window == label2)
+    #         min_dist = np.min(np.linalg.norm(label1_coords[:, None] - label2_coords, axis=-1))
+    #         if min_dist > 20:
+    #             # print(f"min_dist: {min_dist}")
+    #             return False
 
     return True
 

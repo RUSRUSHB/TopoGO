@@ -9,7 +9,7 @@ from source.cross_detect import *
 from source.alex import *
 
 # read gif image
-img = load_image("img/rolfsen_all/10_163.png")
+img = load_image("img/rolfsen_all/9_32.png")
 windowSize = 27
 
 # visualize(img, 'Original Image')
@@ -25,11 +25,11 @@ visualize_labels_with_random_color_and_text(labels)
 # save_image(output_img, 'output/3_1_segment.png')
 
 separate_labels = separate_labels(labels)
-# show_each_components(separate_labels)
+show_each_components(separate_labels)
 
 classification = classify_segments(separate_labels)
 unifyLabels = unify_non_line_segments(labels, classification)
-# visualize_labels_with_random_color_and_text(unifyLabels)
+visualize_labels_with_random_color_and_text(unifyLabels)
 crossings = process_image(unifyLabels, windowSize)
 visualize_labels_with_random_color_and_text_and_crossingWindow(
     unifyLabels, crossings, windowSize)
