@@ -280,7 +280,7 @@ def run_with_all_visualization(img):
 # 主程序
 if __name__ == '__main__':
     
-    img = load_image("img/rolfsen_all/8_20.png")
+    img = load_image("img/rolfsen_all/9_32.png")
 
     bi_img = binarize(img)
     labels, component_sizes, output_img = segment_image(bi_img)
