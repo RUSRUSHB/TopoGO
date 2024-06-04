@@ -107,7 +107,7 @@ def alex_polynomial(straight_data: np.array)->np.array:
     uplines = straight_data[:, 1]
     downlines_out = straight_data[:, 2]
     downlines_in = straight_data[:, 3]
-    # print(f'Lines matrix:\n{uplines}\n{downlines_out}\n{downlines_in}')
+    print(f'Lines matrix:\n{uplines}\n{downlines_out}\n{downlines_in}')
 
     # 进行一个映射：uplines的第i个元素要被映射为i
     mapped_lines = np.array([i for i in range(n)])
@@ -121,7 +121,7 @@ def alex_polynomial(straight_data: np.array)->np.array:
     downlines_in = np.array([mapping[x] for x in downlines_in])
     # 将他们reshape为竖着的向量
     
-    # print(f'Mapped Lines matrix:\n{uplines}\n{downlines_out}\n{downlines_in}')
+    print(f'Mapped Lines matrix:\n{uplines}\n{downlines_out}\n{downlines_in}')
 
     matrix = sp.zeros(n)
     for i in range(n):
