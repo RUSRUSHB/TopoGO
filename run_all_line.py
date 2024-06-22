@@ -4,7 +4,7 @@ from source.io import load_image, save_image
 from source.is_line import classify_segments
 from source.util import *
 from source.alex import alex_polynomial, straighten
-from main import *
+from line_main import *
 
 import time
 # read all the image in the folder "img/rolfsen_all" then do the knot detection then store the alex and knot detection result in the folder "output"

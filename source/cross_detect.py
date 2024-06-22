@@ -109,7 +109,7 @@ def is_crossing(window, window_size):
             label1_coords = np.argwhere(window == label1)
             label2_coords = np.argwhere(window == label2)
             min_dist = np.min(np.linalg.norm(label1_coords[:, None] - label2_coords, axis=-1))
-            print(f'min_dist: {min_dist}')
+            # print(f'min_dist: {min_dist}')
             if min_dist > 50:
                 # print(f"min_dist: {min_dist}")
                 return False
