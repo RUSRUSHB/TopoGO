@@ -17,3 +17,5 @@ This project can recognize a knot image and get its topological invariant.
 输入图像来自Knot Atlas
 
 > TODO: 证明其与其他拓扑不变量的转化关系；使用别的方法获得亚历山大多项式
+
+![Poster](analysis/SUSTech_DIP_Poster_Eason.png)
