@@ -8,9 +8,9 @@ def is_crossing(window, window_size):
     background_label = unique_labels[-1]
     foreground_labels = unique_labels[unique_labels != background_label]
     # 检查是否有正确数量的前景标签
-    if len(foreground_labels) !=3:
+    if len(foreground_labels) != 3:
         return False
-    
+
     # 所有标签的面积都必须大于一个值
     for label in unique_labels:
         if np.sum(window == label) < 5:
@@ -19,23 +19,17 @@ def is_crossing(window, window_size):
     if np.sum(window == np.max(window)) < 20:
         return False
 
-
-
-
     # 创建围绕窗口的一个数组
     edge_labels = np.concatenate([window[0:-1, 0], window[-1, :], window[-2:0:-1, -1], window[0, -1:0:-1]])
     edge_labels_shift = np.roll(edge_labels, len(edge_labels) // 2)
     # 去除背景标签
-
-
-
 
     edge_labels = edge_labels[edge_labels != background_label]
     edge_labels_shift = edge_labels_shift[edge_labels_shift != background_label]
 
     # 兼并相同的标签，保留交替信息
     # 遍历检查，如果当前标签和上一个标签一样，就删掉当前这一个
-    
+
     i = 0
     while i < len(edge_labels) - 1:
         if edge_labels[i] == edge_labels[i + 1]:
@@ -71,11 +65,11 @@ def is_crossing(window, window_size):
         return False
 
     [down_label_1, down_label_2] = [x for x in unique_labels if x != up_label]
-    
+
     l1, l2, l3 = up_label, down_label_1, down_label_2
     # 数学分析可得所有可能的交替顺序
-    possible_labels_5 = [[l1,l3,l1,l2,l1], [l1,l2,l1,l3,l1], [l3,l1,l2,l1,l3], [l2,l1,l3,l1,l2]]
-    possible_labels_4 = [[l1,l3,l1,l2], [l1,l2,l1,l3], [l3,l1,l2,l1], [l2,l1,l3,l1]]
+    possible_labels_5 = [[l1, l3, l1, l2, l1], [l1, l2, l1, l3, l1], [l3, l1, l2, l1, l3], [l2, l1, l3, l1, l2]]
+    possible_labels_4 = [[l1, l3, l1, l2], [l1, l2, l1, l3], [l3, l1, l2, l1], [l2, l1, l3, l1]]
     # print("Lines: ", l1, l2, l3)
     # 长度为5的话，为13121,12131,31213,21312
     # edge_labels = edge_labels.tolist()
@@ -94,7 +88,7 @@ def is_crossing(window, window_size):
             if edge_labels == label:
                 # print('True label 4')
                 is_true_alternating = True
-        
+
         # print('False label 4')
 
     if not is_true_alternating:
@@ -103,7 +97,7 @@ def is_crossing(window, window_size):
 
     # 不同前景标签的相互最小距离必须小于一个值
     for i in range(len(foreground_labels)):
-        for j in range(i+1, len(foreground_labels)):
+        for j in range(i + 1, len(foreground_labels)):
             label1 = foreground_labels[i]
             label2 = foreground_labels[j]
             label1_coords = np.argwhere(window == label1)
@@ -124,11 +118,11 @@ def find_crossings(labels, window_size=5):
 
     # for y in range(half_window, height - half_window, int(half_window/6)):
     #     for x in range(half_window, width - half_window, int(half_window/6)):
-    
+
     for y in range(half_window, height - half_window, 1):
         for x in range(half_window, width - half_window, 1):
             window = labels[y - half_window:y + half_window +
-                            1, x - half_window:x + half_window + 1]
+                                            1, x - half_window:x + half_window + 1]
             if is_crossing(window, window_size):
                 unique_labels = tuple(
                     sorted(np.unique(window[window != np.max(window)])))
@@ -192,15 +186,15 @@ def process_image(labels, window_size=5):
         x, y, unique_labels = crossing
         if unique_labels not in seen_combinations:
             seen_combinations.add(unique_labels)
-            window = labels[y - window_size//2:y + window_size //
-                            2 + 1, x - window_size//2:x + window_size//2 + 1]
+            window = labels[y - window_size // 2:y + window_size //
+                                                 2 + 1, x - window_size // 2:x + window_size // 2 + 1]
             top_line, bottom_line = determine_lines(window)
             # only one topLine and two buttomLine, examine this
             if (len(top_line) != 1 or len(bottom_line) != 2):
                 continue
             unique_crossings.append((x, y, top_line, bottom_line))
             # print(
-                # f"Crossing at ({x}, {y}): Top line label(s): {top_line}, Bottom line label(s): {bottom_line}")
+            # f"Crossing at ({x}, {y}): Top line label(s): {top_line}, Bottom line label(s): {bottom_line}")
 
     # return a newthing call crossings_arr, crossings_arr is a 2d numpy array, first is top_line, second and third is bottom_line
     # crossings_arr = np.zeros((len(unique_crossings), 3), dtype=int)

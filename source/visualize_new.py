@@ -53,7 +53,7 @@ def visualize_labels_with_random_color_and_text(labels):
     unique_labels = np.unique(labels)
 
     # 创建一个颜色字典，将每个标签映射到一个随机颜色
-    color_dict = {label: np.random.rand(3,) for label in unique_labels}
+    color_dict = {label: np.random.rand(3, ) for label in unique_labels}
 
     # 创建一个RGB图像，初始化为全白色
     height, width = labels.shape

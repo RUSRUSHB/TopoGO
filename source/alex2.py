@@ -1,5 +1,6 @@
 import numpy as np
 import sympy as sp
+
 '''
 window_scan返回的数组维度为(n, 4):
 c_i=[crossing, upline, downlines[0], downlines[1]]
@@ -9,28 +10,31 @@ c_i=[crossing, upline, downlines[0], downlines[1]]
 
 '''
 
+
 def create_snake_array(n):
     # 第一部分：从 [0, 0] 到 [n-1, 0]
     part1 = np.column_stack((np.arange(n), np.zeros(n, dtype=int)))
 
     # 第二部分：从 [n-1, 1] 到 [n-1, n-1]
-    part2 = np.column_stack((np.full(n-1, n-1), np.arange(1, n)))
+    part2 = np.column_stack((np.full(n - 1, n - 1), np.arange(1, n)))
 
     # 第三部分：从 [n-1, n-1] 到 [n-1, 0]
-    part3 = np.column_stack((np.full(n-1, n-1), np.arange(n-1, 0, -1)))
+    part3 = np.column_stack((np.full(n - 1, n - 1), np.arange(n - 1, 0, -1)))
 
     # 第四部分：从 [n-1, 0] 到 [1, 0]
-    part4 = np.column_stack((np.arange(n-1, 0, -1), np.zeros(n-1, dtype=int)))
+    part4 = np.column_stack((np.arange(n - 1, 0, -1), np.zeros(n - 1, dtype=int)))
 
     # 合并所有部分
     snake_array = np.vstack((part1, part2, part3, part4))
 
     return snake_array
+
+
 def extract_boundary_counterclockwise(matrix):
     # 确保输入是一个二维数组
     if len(matrix.shape) != 2:
         raise ValueError("Input must be a 2D array")
-    
+
     rows, cols = matrix.shape
     if rows == 1:
         return matrix[0, :].tolist()
@@ -61,12 +65,10 @@ def window_area_reassign(windows):
     windows_size = windows.shape[0]
     snake_array = create_snake_array(windows_size)
 
-
-
     around_loc = np
 
-def straighten(raw_data: np.array)->np.array:
-    
+
+def straighten(raw_data: np.array) -> np.array:
     # 提取第一列
     raw_uplines = raw_data[:, 0]
 
@@ -78,10 +80,9 @@ def straighten(raw_data: np.array)->np.array:
 
     # 1. 从第一个crossing开始
     crossing_list = [0]  # 从原始数据的第一个crossing开始
-    start_line_list = [raw_downlines[0, 0]]# 从第一个crossing的第一个downline开始
+    start_line_list = [raw_downlines[0, 0]]  # 从第一个crossing的第一个downline开始
     crossing_num = len(raw_data)
     target = raw_downlines[0, 0]
-
 
     for i in range(crossing_num):
         for j in range(crossing_num):
@@ -93,12 +94,12 @@ def straighten(raw_data: np.array)->np.array:
                 # 从这个crossing的downlines中找到不是target（也就是另外一个）的那个downline
                 # [0]是因为它返回的是一个列表，而不是一个数字。而这个列表长度必为1
                 start_line_list.append(target)
-                
+
                 break
-    
+
     print("Start Line list:", start_line_list)
     print("Crossing list:", crossing_list)
-    
+
     straight_data = np.zeros([crossing_num, 4], dtype=int)
     # 按照crossing_list的顺序，将raw_data的数据按照start_line_list的顺序填入
     for i in range(crossing_num):
@@ -110,9 +111,10 @@ def straighten(raw_data: np.array)->np.array:
     print("Straight data:\nCrossing|Upline|Downline_out|Downline_in\n", straight_data)
     return straight_data
 
-def alex_polynomial(straight_data: np.array)->np.array:
 
-    pass    
+def alex_polynomial(straight_data: np.array) -> np.array:
+    pass
+
 
 # 样例：
 if __name__ == "__main__":
@@ -122,7 +124,6 @@ if __name__ == "__main__":
     # matrix.col_del(0)
     # print(matrix)
     # print(sp.det(matrix))
-
 
     # raw_data = np.array([[1,3,2], [3,1,2], [2,3,1]])-1
     # 3_1 trefoil

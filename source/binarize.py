@@ -2,7 +2,6 @@ import cv2
 
 
 def binarize(img):
-
     parameters = [127]
     # 参数列表：[阈值]
 

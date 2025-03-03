@@ -20,7 +20,7 @@ def arrange_labels(input_array):
     """
     # 将零替换为最大的标签
     max_label = np.max(input_array)
-    input_array[input_array == 0] = max_label+1
+    input_array[input_array == 0] = max_label + 1
 
     # 按照步长为1的等差数列重新排列其他标签
     unique_labels = np.unique(input_array)
@@ -112,7 +112,6 @@ def unifyCrossings(crossings_arr):
     unified_crossings = unified_crossings[np.argsort(unified_crossings[:, 0])]
 
     return unified_crossings
-
 
 # if __name__ == '__main__':
 #     # 示例使用

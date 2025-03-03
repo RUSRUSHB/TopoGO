@@ -65,7 +65,6 @@ def is_line_segment(layer):
 
 
 def classify_segments(segmented_image):
-
     classification = {}
     radii = np.zeros(len(segmented_image))
 

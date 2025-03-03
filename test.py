@@ -15,9 +15,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from scipy.spatial import KDTree
 
+
 def visualize_labels_with_random_color_and_text(labels):
     unique_labels = np.unique(labels)
-    color_dict = {label: np.random.rand(3,) for label in unique_labels}
+    color_dict = {label: np.random.rand(3, ) for label in unique_labels}
     height, width = labels.shape
     colored_image = np.ones((height, width, 3))
     for label in unique_labels:
@@ -41,6 +42,7 @@ def visualize_labels_with_random_color_and_text(labels):
     plt.axis('off')
     plt.show()
 
+
 def is_surrounded_by_same_label(labels, x, y, label):
     height, width = labels.shape
     for dy in [-1, 0, 1]:
@@ -51,6 +53,7 @@ def is_surrounded_by_same_label(labels, x, y, label):
                     return False
     return True
 
+
 def extract_centerline(binary_image):
     dist_transform = cv2.distanceTransform(binary_image, cv2.DIST_L2, 5)
     dist_transform = cv2.normalize(dist_transform, dist_transform, 0, 1.0, cv2.NORM_MINMAX)
@@ -58,6 +61,7 @@ def extract_centerline(binary_image):
     skeleton = (skeleton * 255).astype(np.uint8)
     skeleton = cv2.ximgproc.thinning(skeleton)
     return skeleton
+
 
 def extract_centerlines_for_labels(labels):
     unique_labels = np.unique(labels)
@@ -71,19 +75,22 @@ def extract_centerlines_for_labels(labels):
         centerlines[centerline > 0] = label
     return centerlines
 
+
 def remove_border_pixels(image, border_width=1):
     return image[border_width:-border_width, border_width:-border_width]
+
 
 def get_endpoints(skeleton):
     endpoints = []
     for y in range(1, skeleton.shape[0] - 1):
         for x in range(1, skeleton.shape[1] - 1):
             if skeleton[y, x] > 0:
-                neighborhood = skeleton[y-1:y+2, x-1:x+2]
+                neighborhood = skeleton[y - 1:y + 2, x - 1:x + 2]
                 if np.sum(neighborhood) == 2:
                     endpoints.append((y, x))
     print(endpoints)
     return endpoints
+
 
 def find_crossings(labels, window_size):
     height, width = labels.shape
@@ -94,8 +101,9 @@ def find_crossings(labels, window_size):
             window = labels[y:y + window_size, x:x + window_size]
             if is_crossing(window, window_size):
                 crossings.append((y, x))
-    
+
     return crossings
+
 
 def is_crossing(window, window_size):
     unique_labels, label_counts = np.unique(window, return_counts=True)
@@ -117,7 +125,7 @@ def is_crossing(window, window_size):
     max_count_label = unique_labels[max_count_index]
     max_count_value = label_counts[max_count_index]
 
-    if max_count_value < min_count*5:
+    if max_count_value < min_count * 5:
         return False
 
     top_edge_labels = window[0, :]
@@ -158,6 +166,7 @@ def is_crossing(window, window_size):
         return False
 
     return True
+
 
 img = load_image("img/rolfsen_all/4_3.png")
 windowSize = 30

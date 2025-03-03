@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def zhang_suen_thinning(image):
     # Zhang-Suen细化算法的迭代过程
     def thinning_iteration(image, iter):
@@ -7,29 +8,29 @@ def zhang_suen_thinning(image):
         for i in range(1, image.shape[0] - 1):
             for j in range(1, image.shape[1] - 1):
                 p2, p3, p4, p5, p6, p7, p8, p9 = n = neighbours(image, i, j)
-                if (image[i, j] == 1 and                  # 中心像素为1
-                    2 <= sum(n) <= 6 and                   # 中心像素的8邻域有2-6个非零像素
-                    transitions(n) == 1 and               # 中心像素的8邻域的非零像素到0像素的过渡次数为1
-                    p2 * p4 * p6 == 0 and p4 * p6 * p8 == 0):  # p2, p4, p6, p8不全为非零像素
+                if (image[i, j] == 1 and  # 中心像素为1
+                        2 <= sum(n) <= 6 and  # 中心像素的8邻域有2-6个非零像素
+                        transitions(n) == 1 and  # 中心像素的8邻域的非零像素到0像素的过渡次数为1
+                        p2 * p4 * p6 == 0 and p4 * p6 * p8 == 0):  # p2, p4, p6, p8不全为非零像素
                     marker[i, j] = 1
         image = np.logical_and(image, np.logical_not(marker))
-        
+
         marker = np.zeros_like(image)
         for i in range(1, image.shape[0] - 1):
             for j in range(1, image.shape[1] - 1):
                 p2, p3, p4, p5, p6, p7, p8, p9 = n = neighbours(image, i, j)
                 if (image[i, j] == 1 and
-                    2 <= sum(n) <= 6 and
-                    transitions(n) == 1 and
-                    p2 * p4 * p8 == 0 and p2 * p6 * p8 == 0):
+                        2 <= sum(n) <= 6 and
+                        transitions(n) == 1 and
+                        p2 * p4 * p8 == 0 and p2 * p6 * p8 == 0):
                     marker[i, j] = 1
         image = np.logical_and(image, np.logical_not(marker))
         return image
 
     # 计算像素邻域
     def neighbours(image, x, y):
-        return [image[x-1, y], image[x-1, y+1], image[x, y+1], image[x+1, y+1], 
-                image[x+1, y], image[x+1, y-1], image[x, y-1], image[x-1, y-1]]
+        return [image[x - 1, y], image[x - 1, y + 1], image[x, y + 1], image[x + 1, y + 1],
+                image[x + 1, y], image[x + 1, y - 1], image[x, y - 1], image[x - 1, y - 1]]
 
     # 计算从0到1的过渡次数
     def transitions(neighbours):

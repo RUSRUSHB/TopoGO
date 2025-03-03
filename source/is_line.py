@@ -46,7 +46,6 @@ def is_line_segment(layer):
     return label, int(max_val), min_enclosing_radius
 
 
-
 def classify_segments(segmented_image):
     classification = {}
     radii = np.zeros(len(segmented_image))
@@ -77,10 +76,9 @@ def classify_segments(segmented_image):
     # Classify segments based on line width and minimum enclosing radius
     for label, (radius, min_enclosing_radius) in classification.items():
         if (abs(radius - line_width) < 0.4 * line_width) and (min_enclosing_radius >= 3 * line_width):
-        # if (abs(radius - line_width) < 0.4 * line_width) and (min_enclosing_radius >= 3 * line_width):
+            # if (abs(radius - line_width) < 0.4 * line_width) and (min_enclosing_radius >= 3 * line_width):
             classification[label] = True
         else:
             classification[label] = False
 
     return classification
-

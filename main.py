@@ -47,6 +47,5 @@ print(f"crossings_arr: {crossings_arr}")
 unifyCrossings = unifyCrossings(crossings_arr)
 print(f"crossings_arr: {unifyCrossings}")
 
-
 straightened_data = straighten(unifyCrossings)
 print("The result is: ", alex_polynomial(straightened_data)[0])

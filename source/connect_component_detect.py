@@ -68,7 +68,7 @@ def connected_components(img):
     # 重新排序标签
     new_labels = np.zeros_like(labels)
     label_mapping = {old_label: new_label for new_label,
-                     old_label in enumerate(np.unique(labels))}
+    old_label in enumerate(np.unique(labels))}
     for old_label, new_label in label_mapping.items():
         new_labels[labels == old_label] = new_label
 

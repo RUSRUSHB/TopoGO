@@ -27,5 +27,3 @@ def show_each_components(labels):
         visualize(component, f'Component {i}')
     # 注意到第一个组件是轮廓线，最后一个组件是背景
     pass
-
-
