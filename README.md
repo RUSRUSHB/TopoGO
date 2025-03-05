@@ -8,7 +8,7 @@ This project can recognize a knot image and get its topological invariant.
 
 `run_all.py`, `run_all_line`: 进行所有图片的处理(Process all images)
 
-`DIP_Final_Project.pdf`是课程报告
+`TopoGO_Knot-Detection-of-Images.pdf`是报告
 
 `SUSTech_DIP_Poster`是海报
 
