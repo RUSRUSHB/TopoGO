@@ -1,10 +1,15 @@
-# 忽略所有 __pycache__ 文件夹
+# Python bytecode cache
 __pycache__/
-
-# 忽略 .idea 文件夹
-.idea/
-
-# 忽略 source 文件夹下的 __pycache__ 文件夹
 source/__pycache__/
 
+# IDE files
+.idea/
+.vscode/
+
+# Scrapers
 spider/
+
+# OS files
+.DS_Store
+
+.venv/

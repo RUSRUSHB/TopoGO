@@ -1,32 +1,54 @@
-# TopoGO_SUSTech_EE326_Project
+# TopoGO — Knot Detection from Images
 
 ## Introduction
 
-This project can recognize a knot image and get its topological invariant.
+This project recognizes knot images and computes their topological invariants (Alexander polynomials). It implements two detection pipelines:
 
-`main.py`, `line_main.py`: Process one image, step by step
+### Pipeline A — Sliding Window Method
+Detects crossings by scanning the label image with a sliding window.
 
-`run_all.py`, `run_all_line`: Process all images
+- **Demo (single image):** `demo_window.py`
+- **Batch (all images):** `batch_window.py`
 
-`TopoGO_Knot-Detection-of-Images.pdf`: Paper
+### Pipeline B — Centerline Method
+Extracts skeleton centerlines, finds their endpoints, and detects crossings geometrically.
 
-`SUSTech_DIP_Poster`: Posters
+- **Demo (single image):** `demo_centerline.py`
+- **Batch (all images):** `batch_centerline.py`
 
-`All_result_analysis.xlsx`: Results
+## Processing Pipeline
 
-## 简介
+```
+ Image → Binarize → Segment → Label → Classify → Detect Crossings → Alexander Polynomial
+  (s0)     (s1)       (s2)     (s3)      (s4)     (s5a / s5b)            (s6)
+```
 
-这个项目能够识别一张扭结图片获得其拓扑不变量。
+Source modules in `source/` are numbered by pipeline step:
 
-`main.py`, `line_main.py`: 逐步展示如何处理一张图片
+| Module | Step | Description |
+|---|---|---|
+| `s0_io.py` | 0 | Image loading and saving |
+| `s1_binarize.py` | 1 | Threshold-based binarization |
+| `s2_segment.py` | 2 | Connected component labeling |
+| `s3_label_utils.py` | 3 | Label arrangement, separation, and merging |
+| `s4_classify.py` | 4 | Line segment classification |
+| `s5a_cross_detect.py` | 5a | Sliding window crossing detection (Pipeline A) |
+| `s5b_centerline.py` | 5b | Centerline-based crossing detection (Pipeline B) |
+| `s5b_thinning.py` | 5b | Zhang-Suen thinning (reference implementation) |
+| `s6_alexander.py` | 6 | Alexander polynomial computation |
+| `viz.py` | — | Visualization utilities |
 
-`run_all.py`, `run_all_line`: 进行所有图片的处理
+## Setup
 
-`TopoGO_Knot-Detection-of-Images.pdf`是报告
+```bash
+pip install -r requirements.txt
+```
 
-`SUSTech_DIP_Poster`是海报
+## References
 
-`All_result_analysis.xlsx`是结果分析
+- `TopoGO_Knot-Detection-of-Images.pdf` — Project paper
+- `SUSTech_DIP_Poster_*.pdf` — Conference posters
+- Input images sourced from [Knot Atlas](https://katlas.org/)
 
 ---
 
@@ -35,6 +57,4 @@ This project can recognize a knot image and get its topological invariant.
 
 ---
 
-输入图像来自Knot Atlas
-
-> TODO: 证明其与其他拓扑不变量的转化关系；使用别的方法获得亚历山大多项式
+> **TODO:** Prove conversion relationships with other topological invariants; explore alternative methods for computing the Alexander polynomial.
