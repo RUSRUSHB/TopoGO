@@ -1,5 +1,8 @@
 # TopoGO — Knot Detection from Images
 
+[中文版README](./README_zh.md)
+
+
 ## Introduction
 
 This project recognizes knot images and computes their topological invariants (Alexander polynomials). It implements two detection pipelines:
@@ -23,19 +26,19 @@ Extracts skeleton centerlines, finds their endpoints, and detects crossings geom
   (s0)     (s1)       (s2)     (s3)      (s4)     (s5a / s5b)            (s6)
 ```
 
-Source modules in `source/` are numbered by pipeline step:
+Source modules in `src/` are numbered by pipeline step:
 
 | Module | Step | Description |
 |---|---|---|
-| `s0_io.py` | 0 | Image loading and saving |
-| `s1_binarize.py` | 1 | Threshold-based binarization |
-| `s2_segment.py` | 2 | Connected component labeling |
-| `s3_label_utils.py` | 3 | Label arrangement, separation, and merging |
-| `s4_classify.py` | 4 | Line segment classification |
-| `s5a_cross_detect.py` | 5a | Sliding window crossing detection (Pipeline A) |
-| `s5b_centerline.py` | 5b | Centerline-based crossing detection (Pipeline B) |
-| `s5b_thinning.py` | 5b | Zhang-Suen thinning (reference implementation) |
-| `s6_alexander.py` | 6 | Alexander polynomial computation |
+| `0_io.py` | 0 | Image loading and saving |
+| `1_binarize.py` | 1 | Threshold-based binarization |
+| `2_segment.py` | 2 | Connected component labeling |
+| `3_label_utils.py` | 3 | Label arrangement, separation, and merging |
+| `4_classify.py` | 4 | Line segment classification |
+| `5a_cross_detect.py` | 5a | Sliding window crossing detection (Pipeline A) |
+| `5b_centerline.py` | 5b | Centerline-based crossing detection (Pipeline B) |
+| `5b_thinning.py` | 5b | Zhang-Suen thinning (reference implementation) |
+| `6_alexander.py` | 6 | Alexander polynomial computation |
 | `viz.py` | — | Visualization utilities |
 
 ## Setup
