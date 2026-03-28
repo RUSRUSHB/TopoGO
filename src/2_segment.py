@@ -1,6 +1,6 @@
-"""步骤 2: 连通组件划分/检测算法。
+"""步骤 2: 连通分量检测算法。
 
-基于双遍历（Two-pass）以及并查集原理（Union-Find），在二值化图里提取出各个连通的前景组件标签。
+基于两遍扫描法 (Two-pass) 和并查集 (Union-Find) 原理，提取二值图像中的前景连通分量。
 """
 
 import numpy as np
@@ -8,17 +8,17 @@ import cv2
 
 
 def connected_components(img: np.ndarray) -> tuple[np.ndarray, dict[int, int]]:
-    """在当前已二值化的图像里找到连通区域，为其贴上组件标签。
+    """检测二值图像中的连通区域并进行标记。
 
-    使用了结合【路径压缩】及【按秩合并】优化的并查集查找两遍算法(Two-pass algorithm)。
-    请注意：仅有像素值为白色（数值 255）的点才被认定属于有效前景计算之内。
+    使用两遍扫描算法，并结合路径压缩和按秩合并优化的并查集。
+    注意：仅像素值为 255 的点被视为前景。
 
     Args:
-        img: 黑白二值化图像形参 (0 代表背景背景, 255 意为前景像素)。
+        img: 黑白二值图像 (0 为背景, 255 为前景)。
 
     Returns:
-        包含以下元素的元组形式 (labels连通标签数组, component_sizes各元素体积字典)。
-        其中 labels 是从数值 '1' 起头向后依次分配整数作为独立标签的矩阵。
+        包含以下元素的元组: (labels 标记数组, component_sizes 连通分量大小字典)。
+        labels 矩阵中的标签从 1 开始分配。
     """
     height, width = img.shape
     labels = np.zeros((height, width), dtype=int)
@@ -26,7 +26,7 @@ def connected_components(img: np.ndarray) -> tuple[np.ndarray, dict[int, int]]:
 
     def find(parent, x):
         while parent[x] != x:
-            parent[x] = parent[parent[x]]  # 触发查找树状结构的路径快速收缩
+            parent[x] = parent[parent[x]]  # 路径压缩
             x = parent[x]
         return x
 
@@ -45,7 +45,7 @@ def connected_components(img: np.ndarray) -> tuple[np.ndarray, dict[int, int]]:
     parent = {}
     rank = {}
 
-    # 第一轮逐行遍历操作: 先初步分配局部区域的临时子标签编号、并将连接规则更新入并查集内部
+    # 第一轮遍历: 初步标记并维护并查集中的等价关系
     for y in range(height):
         for x in range(width):
             if img[y, x] == 255:
@@ -66,20 +66,20 @@ def connected_components(img: np.ndarray) -> tuple[np.ndarray, dict[int, int]]:
                     for neighbor in neighbors:
                         union(parent, rank, smallest_label, neighbor)
 
-    # 第二次全面遍历: 正式解析连通树，使得所有的连通组块对应到最初那个最高根标签上
+    # 第二轮遍历: 解析并查集，使所有连通像素点共享同一个根标签
     for y in range(height):
         for x in range(width):
             if labels[y, x] > 0:
                 labels[y, x] = find(parent, labels[y, x])
 
-    # 根据最新的标签情况来计算属于同一组件范围包含的总块个数（尺寸）
+    # 统计每个连通分量的像素数量（大小）
     component_sizes = {}
     for label in np.unique(labels):
         if label == 0:
             continue
         component_sizes[label] = np.sum(labels == label)
 
-    # 最后再统一映射重排标签数列，使其保证像 1,2,3,4... 等完全连续的不中断序列形式
+    # 重新映射标签，确保它们是 1, 2, 3... 连续的整数映射
     new_labels = np.zeros_like(labels)
     label_mapping = {old: new for new, old in enumerate(np.unique(labels))}
     for old_label, new_label in label_mapping.items():
@@ -93,19 +93,19 @@ def connected_components(img: np.ndarray) -> tuple[np.ndarray, dict[int, int]]:
 
 
 def visualize_components(img: np.ndarray, labels: np.ndarray) -> np.ndarray:
-    """给那些标定好连通区域的不同组件上涂色彩，用作展示可视化效果使用。
+    """为检测到的连通分量随机着色，用于可视化。
 
     Args:
-        img: 处理初的高宽灰阶图底板 (在这里被拿来对比获取形状规格即可)。
-        labels: 经 connected_components() 解析产出的各像素连通结果身份码数组。
+        img: 原始灰度图像（仅用于获取尺寸）。
+        labels: 连通分量标签数组。
 
     Returns:
-        随机染上互斥差异显著彩色的最终 RGB 图像数组矩阵。
+        着色后的 RGB 图像数组。
     """
     unique_labels = np.unique(labels)
     num_labels = len(unique_labels)
     colors = np.random.randint(0, 255, size=(num_labels, 3))
-    colors[0] = [0, 0, 0]  # 让处于大片空缺背景下的色块始终维持黑色不变
+    colors[0] = [0, 0, 0]  # 背景始终设为黑色
 
     output_img = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
     for i, label in enumerate(unique_labels):
@@ -117,14 +117,15 @@ def visualize_components(img: np.ndarray, labels: np.ndarray) -> np.ndarray:
 
 
 def segment_image(binary_img: np.ndarray) -> tuple[np.ndarray, dict, np.ndarray]:
-    """对二值图像本身展开划分并分割为相互带记号连通的分块组件集合。
+    """对二值图像进行分割，检测连通区域。
 
     Args:
-        binary_img: 只有0即255的源头二值图文件。
+        binary_img: 输入的二值化图像。
 
     Returns:
-        返回具有三属性的一个集合元组结构，由 (连通区域数字记号群组, 对应其物理体积记录词典, 带颜色的可展示版本图片) 拼接而成。
+        包含 (labels 标签数组, 连通分量大小字典, 可视化彩色图) 的元组。
     """
     labels, component_sizes = connected_components(binary_img)
     output_img = visualize_components(binary_img, labels)
     return labels, component_sizes, output_img
+

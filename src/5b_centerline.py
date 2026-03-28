@@ -1,6 +1,8 @@
-"""步骤 5b: 基于提取主心骨中心线分析法勘定向重叠结点位置的工作流。
+"""步骤 5b: 基于中心线分析法识别重叠交叉点的工作流。
 
-属于管线 B (Pipeline B) 的一种解决手段法门：首先把各段已分离带编号形状粗壮的躯体剥离开来并通过细分抽取缩减变为仅有一个像素宽度的主中心线 (骨架结构化)，接着定位识别其各向尽头部位的极点端点，随后再去顺藤摸瓜勘察是否存在跨过第三类编号地表后将两个同色系尽头断联拼接在一块儿相通的情况以此从而将整个隐秘于遮蔽底下交叉位置发掘查实出来。
+属于 Pipeline B 方案：首先对各连通分量进行骨架化（Skeletonization）处理，将其缩减为单像素宽度的中心线。
+接着定位中心线的端点，通过搜索端点间的邻近关系，判断是否存在被第三方组件遮挡导致的断裂，
+从而识别出图像中隐藏的交叉点位置。
 """
 
 import cv2
@@ -10,15 +12,15 @@ import skimage.draw
 
 
 def extract_centerline(binary_image: np.ndarray) -> np.ndarray:
-    """去将原本丰满占据面积的一个白色大形状躯体抽丝剥茧还原为其单薄最里层的骨架中轴线走向。
+    """提取二值图像中前景区域的单像素宽度骨架（中心线）。
 
-    做法是应用测算离边缘界限的纵深空间距离转换配合进行数值阈值界限切割及后续用上专门用于进行影像学身骨架剥离化变薄的技术函数处理收束搞定。
+    实现方法：计算离距离变换（Distance Transform），结合阈值分割与 skimage 的细化（Thinning）算法。
 
     Args:
-        binary_image: 那副具有白区块占据和黑暗空白背景的只有一个纯色彩频道的双色彩二极相图。
+        binary_image: 输入的单通道二值图像。
 
     Returns:
-        最终蜕下其余边肉而仅仅剩下的那一具同样用二元（像素0或255表达）来陈列显示出的极细线形残骸走向骨架图模板。
+        提取出的单像素宽度骨架图（像素值为 0 或 255）。
     """
     dist_transform = cv2.distanceTransform(binary_image, cv2.DIST_L2, 3)
     dist_transform = cv2.normalize(
@@ -33,13 +35,13 @@ def extract_centerline(binary_image: np.ndarray) -> np.ndarray:
 
 
 def extract_centerlines_for_labels(labels: np.ndarray) -> np.ndarray:
-    """给那些全都在这前排里登场挂着号的全部实打实组成有效成分标签均提取制备出它们独家的主干中心骨架线路。
+    """为标签图像中的每个连通分量提取其中心线骨架。
 
     Args:
-        labels: 标好字号有区分色彩的一副满是分块标号码的整图大阵图 (一般用到了像 [5, 5] 这里所在的码作为整个基调大背景区）。
+        labels: 带有连通分量标签的图像数组。
 
     Returns:
-        一样拥有跟进原来源板等大同宽的长宽阵型，但是其现在只保留极少数真正属于中心线上的那一细排被印上了专属标号的像素点，别的一概通统刷去变成0。
+        包含各组件骨架的图像数组，骨架像素保留其原始标签值，其余为 0。
     """
     unique_labels = np.unique(labels)
     centerlines = np.zeros_like(labels, dtype=np.uint8)
@@ -56,20 +58,20 @@ def extract_centerlines_for_labels(labels: np.ndarray) -> np.ndarray:
 
 
 def get_endpoints(skeleton: np.ndarray) -> list[tuple[int, int]]:
-    """定位找出这一幅残图里其所有形似一字长蛇阵断裂最外侧那头仅仅孤悬在外只接触一个同胞伴随相连的极度尽头之处。
+    """识别骨架图中的端点（即 8-邻域内仅有一个相邻像素的点）。
 
     Args:
-        skeleton: 一整张干干净净只剩极瘦条线穿行在其中的骨架构像图册。
+        skeleton: 单像素宽度的骨架图像。
 
     Returns:
-        包裹着一份含有多个类似于如 (纵轴位置y, 横轴所在x) 那般定位精准无误标识终极断裂口断头座标端点的成串清单集合体。
+        包含端点坐标 (y, x) 的列表。
     """
     endpoints = []
     for y in range(1, skeleton.shape[0] - 1):
         for x in range(1, skeleton.shape[1] - 1):
             if skeleton[y, x] > 0:
                 neighborhood = skeleton[y - 1 : y + 2, x - 1 : x + 2]
-                if np.sum(neighborhood) == 2:  # self + 1 neighbour 只包含自己与外侧孤立存在的一个陪伴点
+                if np.sum(neighborhood) == 2:  # 包含点自身及 1 个邻居
                     endpoints.append((y, x))
     return endpoints
 
@@ -77,16 +79,16 @@ def get_endpoints(skeleton: np.ndarray) -> list[tuple[int, int]]:
 def dilate_line(
     image: np.ndarray, pt1: tuple[int, int], pt2: tuple[int, int], width: int = 3
 ) -> np.ndarray:
-    """在一幅全凭真假（True 或 False）布尔型作判定画质的模板里挥洒连接起两个目标座标并且将这一相通连接的线段予以粗壮膨大化扩宽操作。
+    """在布尔图像中绘制连接两点的粗线段。
 
     Args:
-        image: 用于作为接受这般写画挥扫改动而承载容纳变更之后墨迹影响的布尔形式大原版地图册。
-        pt1: 起笔初始一头的明确位标座次 (y 轴竖列, x 轴横排)。
-        pt2: 停笔收尾降落定点目标的终局精确经纬 (y 列向, x 行向)。
-        width: 具体执行增幅把轨迹墨水线变多大变粗实的实际膨胀展宽规模值。
+        image: 目标布尔图像。
+        pt1: 起始点坐标 (y, x)。
+        pt2: 终止点坐标 (y, x)。
+        width: 线段扩充宽度。
 
     Returns:
-        最终接纳并且完好拓印好那粗实过相接线后经过更新了新局面的图像结果结构体。
+        修改后的布尔图像。
     """
     rr, cc = skimage.draw.line(pt1[0], pt1[1], pt2[0], pt2[1])
     for dr in range(-width // 2, width // 2 + 1):
@@ -100,13 +102,13 @@ def dilate_line(
 def map_labels_to_consecutive_integers(
     crossings: list[list[int]],
 ) -> tuple[list[list[int]], dict[int, int]]:
-    """将原本混杂不齐的各路重合叠压涉及相撞对象编码，洗牌均统一由最低点即 0 为起点向后依次重排对齐赋予新的一套完备连贯连续整数代号号源。
+    """将交叉点记录中的原始标签映射为从 0 开始的连续整数。
 
     Args:
-        crossings: 原初包含像类似于这样装束了各种带有 [上方线标兵1号, 遮蔽藏在底下暗线2号, 断线同袍暗线3号] 形制情况交代的三连结构名录组。
+        crossings: 交叉点信息列表，每个元素为 [上方标签, 下方标签A, 下方标签B]。
 
     Returns:
-        捆绑输送出一款含有形似如下 (整编过后重新下发身份编号的新式全体名单阵列, 一份足以从旧时编号对照翻译查询当今新任派发身份密码对应法则密码本字典薄) 形式的双元组合物。
+        包含 (映射后的交叉点列表, 原始标签到新编号的映射字典) 的元组。
     """
     unique_labels = set()
     for crossing in crossings:
@@ -125,19 +127,20 @@ def map_labels_to_consecutive_integers(
 def examine_crossings(
     centerlines: np.ndarray, is_visualize: bool = False
 ) -> list[list[int]]:
-    """凭据分析端点处那些截断面所在情况来实施逆推倒算揪寻找一切关于藏在底下交叉处的真相大白工作核心机构。
+    """通过端点邻近性分析来检测并识别图像中的交叉点。
 
-    面对每一双有着极大关联可能却被割断隔开而具有相异归属称号标签头部的终端极点而言采取以下探测法：
-    1. 在二者间隔空气真空地带隔空连拉飞出构建虚拟并刻意粗壮加粗试探搭通一条连带实线段络联两者。
-    2. 核验搜查有还存在着到底被哪个另外不相干的第三方越线干扰阻拦半途截断了试探搭建出这段跨线天桥地界。
-    3. 要是这桥身下面不偏不歪确确实实刚好只是压上和骑着只存在单独一个唯一一个此外其余第三方它人标记路段时，此情况即确认为符合铁证无疑地发现在此处发生了掩盖跨线越线节点一桩事实。
+    基本逻辑如下：
+    1. 遍历所有骨架端点，寻找属于不同标签且距离较近的端点对。
+    2. 在两端点间绘制测试线段并进行膨胀。
+    3. 检查该线段跨越了哪些其他标签的组件。
+    4. 若刚好跨越了一个独立的第三方标签，则认为该处存在一个交叉点（上方连通，下方被截断）。
 
     Args:
-        centerlines: 仅残余留下瘦削中干标号那些作为线骨组成身段构件所在的像素点的全体二维大合集。
-        is_visualize: 用控制扳机开启决断这一巡狩勘算途次之中途时候产生一系列中途演算画面需不需要显化放出给别人观察参谋。
+        centerlines: 包含各组件中心线（及其原始标签）的图像数组。
+        is_visualize: 是否开启可视化调试窗口。
 
     Returns:
-        带回来属于各方搜查斩获大胜包含形如形同如这类装填有 [架空乘高过之上界压制牌号, 埋于其底遭受割断底层半段残肢甲, 同是埋头底圈底层半段残肢乙] 交代陈列方式交接事实集合的清单总报。
+        交叉点信息列表，格式为 [[上方组件标签, 下方组件标签1, 下方组件标签2], ...]。
     """
     endpoints = {}
     unique_labels = np.unique(centerlines)
@@ -158,7 +161,7 @@ def examine_crossings(
     if not all_endpoints:
         return []
 
-    # Visualization setup
+    # 可视化准备
     if is_visualize:
         import matplotlib.pyplot as plt
         vis_img = centerlines.copy()
@@ -172,14 +175,14 @@ def examine_crossings(
         plt.title("Endpoints Visualization")
         plt.show()
 
-    # Build KD-tree for nearest-neighbour queries
+    # 构建 KD-tree 进行最近邻查询
     tree = KDTree([(y, x) for y, x, _ in all_endpoints])
     crossings = []
     matched_endpoints = set()
 
     for y, x, label in all_endpoints:
         distances, indices = tree.query((y, x), k=6)
-        for idx in indices[1:]:  # Skip self
+        for idx in indices[1:]:  # 跳过自身
             ny, nx, nlabel = all_endpoints[idx]
             if nlabel == label:
                 continue
@@ -187,17 +190,17 @@ def examine_crossings(
             if (y, x) in matched_endpoints or (ny, nx) in matched_endpoints:
                 continue
 
-            # Draw test line between the two endpoints
+            # 在两个端点之间绘制测试路径
             test_image = np.zeros_like(centerlines, dtype=bool)
             test_image = dilate_line(test_image, (y, x), (ny, nx), width=3)
 
-            # Check which labels the line crosses
+            # 统计测试路径跨越的标签
             intersecting_labels = set(centerlines[test_image])
             intersecting_labels.discard(background_label)
             intersecting_labels.discard(label)
             intersecting_labels.discard(nlabel)
 
-            # Valid crossing: exactly one other label between endpoints
+            # 有效交叉点判定：端点对之间恰好被一个第三方标签阻断
             if len(intersecting_labels) == 1:
                 crossing = [list(intersecting_labels)[0], label, nlabel]
                 crossing[1], crossing[2] = sorted([label, nlabel])
@@ -220,3 +223,4 @@ def examine_crossings(
         plt.show()
 
     return crossings
+
